@@ -60,3 +60,35 @@ def aggregate(
             for e in estimates
         ],
     }
+
+
+def ensemble_aggregate(
+    weighted_result: dict,
+    bayesian_result: dict,
+    mc_result: dict,
+) -> dict:
+    """
+    Ensemble of all three aggregation methods.
+    Weighted average of: standard weighted, Bayesian posterior, and MC mean.
+    """
+    w_prob = weighted_result["probability"]
+    b_prob = bayesian_result["bayesian_probability"]
+    mc_prob = mc_result["mean"]
+
+    # ensemble: equal weight
+    ensemble = (w_prob + b_prob + mc_prob) / 3
+
+    # spread: how much do the methods disagree?
+    spread = max(w_prob, b_prob, mc_prob) - min(w_prob, b_prob, mc_prob)
+
+    return {
+        "ensemble_probability": round(ensemble, 4),
+        "ensemble_pct": f"{ensemble:.1%}",
+        "method_spread": round(spread, 4),
+        "methods": {
+            "weighted": round(w_prob, 4),
+            "bayesian": round(b_prob, 4),
+            "monte_carlo": round(mc_prob, 4),
+        },
+        "agreement": "high" if spread < 0.05 else "moderate" if spread < 0.10 else "low",
+    }

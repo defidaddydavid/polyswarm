@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="https://img.shields.io/badge/🐝-PolySwarm-000000?style=for-the-badge&labelColor=F59E0B&color=000000" alt="PolySwarm" height="40" />
+<img src="https://img.shields.io/badge/⟐-PolySwarm-000000?style=for-the-badge&labelColor=F59E0B&color=000000" alt="PolySwarm" height="40" />
 
 <br /><br />
 
@@ -26,7 +26,7 @@
 
 <br />
 
-[**Get Started**](#-quickstart) · [**API Docs**](#-rest-api) · [**Data Sources**](#-live-data-sources) · [**How It Works**](#-how-it-works)
+[**Get Started**](#-quickstart) · [**API Docs**](#-rest-api) · [**Data Sources**](#-live-data-sources) · [**How It Works**](#-how-it-works) · [**Live Site**](https://defidaddydavid.github.io/polyswarm/)
 
 <br />
 
@@ -36,13 +36,13 @@
 
 <br />
 
-## 🎯 Two Powerful Modes
+## Two Powerful Modes
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### 🗳️ Forecast Mode
+### Forecast Mode
 
 Ask any binary question. The swarm debates and returns a calibrated probability.
 
@@ -55,13 +55,14 @@ python main.py forecast \
 **Output:**
 - Probability estimate from 12 independent agents
 - Multi-round debate (agents update after seeing others)
-- Confidence-weighted aggregation
+- Bayesian posterior, Monte Carlo simulation, bootstrap CI
+- Herding detection, Nash equilibrium, information cascades
 - Edge calculation vs live market odds
 
 </td>
 <td width="50%" valign="top">
 
-### 🎭 Scenario Mode
+### Scenario Mode
 
 Simulate how markets react to any event — before it happens.
 
@@ -82,7 +83,7 @@ python main.py scenario \
 
 <br />
 
-## ⚡ Quickstart
+## Quickstart
 
 ```bash
 # Clone
@@ -112,7 +113,7 @@ ANTHROPIC_API_KEY=your_key docker compose up
 
 <br />
 
-## 🔌 Multi-LLM Support
+## Multi-LLM Support
 
 PolySwarm is provider-agnostic. Use whatever LLM you want.
 
@@ -132,7 +133,7 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
 
 <br />
 
-## 🧠 How It Works
+## How It Works
 
 ```
                     ┌──────────────────┐
@@ -156,8 +157,8 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
     │  Round 2: Debate   │        │  Aggregate         │
     │  Update beliefs    │        │  sentiment vector  │
     │       ↓            │        │       ↓            │
-    │  Weighted          │        │  Generate crowd    │
-    │  aggregation       │        │  narrative +       │
+    │  3x Aggregation    │        │  Generate crowd    │
+    │  + Game Theory     │        │  narrative +       │
     │       ↓            │        │  2nd-order effects │
     │  Final probability │        │                    │
     │  + edge vs market  │        │                    │
@@ -175,7 +176,23 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
 
 <br />
 
-## 👥 The 12 Agents
+## Statistical Analysis
+
+Every forecast runs through a full statistical analysis pipeline:
+
+| Method | Module | What It Does |
+|--------|--------|-------------|
+| **Bayesian Updating** | `core/bayesian.py` | Treats each agent's estimate as evidence. Updates beliefs via Bayes' theorem with KL-divergence weighting. More surprising estimates carry more information. |
+| **Monte Carlo Simulation** | `core/statistics.py` | 5,000 simulations treating each agent as a beta distribution. Produces percentiles, skew, and threshold probabilities. |
+| **Bootstrap CI** | `core/statistics.py` | Resamples agent estimates 1,000 times to produce 95% confidence intervals. Quantifies uncertainty in the consensus. |
+| **Herding Detection** | `core/game_theory.py` | HHI-based clustering analysis. Detects when agents converge suspiciously. Flags contrarian signals. |
+| **Information Cascades** | `core/game_theory.py` | Tracks belief shifts between debate rounds. Detects when agents flip sides and whether convergence was genuine. |
+| **Nash Equilibrium** | `core/game_theory.py` | Checks if consensus is stable — would any agent benefit from deviating? Unstable = low-confidence forecast. |
+| **Agent Agreement** | `core/bayesian.py` | Pairwise Jensen-Shannon divergence matrix. Identifies most aligned and most divergent agent pairs. |
+
+<br />
+
+## The 12 Agents
 
 Every agent has a unique lens, information focus, and documented bias — creating genuine disagreement, not echo-chamber consensus.
 
@@ -196,7 +213,7 @@ Every agent has a unique lens, information focus, and documented bias — creati
 
 <br />
 
-## 📡 Live Data Sources
+## Live Data Sources
 
 Every forecast is grounded in **real-time data from 15+ free APIs** — fetched in parallel, no API keys required.
 
@@ -245,7 +262,7 @@ python main.py context
 
 <br />
 
-## 🔗 REST API
+## REST API
 
 ```bash
 # Start server
@@ -277,7 +294,7 @@ Full interactive docs at `http://localhost:8000/docs`
 
 <br />
 
-## 📊 Calibration
+## Calibration
 
 PolySwarm gets smarter over time. Every forecast is tracked. When markets resolve, Brier scores update per agent — and better-calibrated agents automatically receive more weight.
 
@@ -288,14 +305,14 @@ python main.py calibration
 
 | Score | Meaning |
 |-------|---------|
-| 0.00 – 0.10 | 🟢 Excellent calibration |
-| 0.10 – 0.20 | 🟡 Good |
-| 0.20 – 0.25 | 🟠 Average (random = 0.25) |
-| 0.25+ | 🔴 Poor — agent gets downweighted |
+| 0.00 – 0.10 | Excellent calibration |
+| 0.10 – 0.20 | Good |
+| 0.20 – 0.25 | Average (random = 0.25) |
+| 0.25+ | Poor — agent gets downweighted |
 
 <br />
 
-## 🎯 Use Cases
+## Use Cases
 
 | | Use Case | Mode | Example |
 |:---:|----------|------|---------|
@@ -309,7 +326,7 @@ python main.py calibration
 
 <br />
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Live Polymarket sync + auto-compare leaderboard
 - [ ] Web UI with real-time debate viewer
@@ -332,7 +349,9 @@ python main.py calibration
 
 Built by [@defidaddydavid](https://github.com/defidaddydavid)
 
-*If this helps you find edge, drop a ⭐*
+*If this helps you find edge, drop a star*
+
+⟐ PolySwarm
 
 <br />
 

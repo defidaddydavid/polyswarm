@@ -4,152 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PolySwarm — Multi-Agent AI Forecasting Engine</title>
-    <meta name="description" content="12 AI agents debate to forecast prediction markets. Open source. Multi-LLM. 15+ live data feeds.">
+    <meta name="description" content="12 AI agents debate to forecast prediction markets. Bayesian updating, Monte Carlo simulation, game theory. Open source.">
     <meta property="og:title" content="PolySwarm — Multi-Agent AI Forecasting Engine">
     <meta property="og:description" content="Predict markets. Simulate crowds. Find your edge.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://defidaddydavid.github.io/polyswarm/">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Nav -->
+    <div class="grid-bg"></div>
+
     <nav class="nav">
         <div class="nav-inner">
-            <a href="/" class="nav-logo">🐝 PolySwarm</a>
+            <a href="/" class="nav-logo">
+                <svg class="dragonfly-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="5" r="2"/>
+                    <line x1="12" y1="7" x2="12" y2="22" stroke-width="1.5"/>
+                    <path d="M12 10 Q6 6 2 8" fill="none"/>
+                    <path d="M12 10 Q18 6 22 8" fill="none"/>
+                    <path d="M12 14 Q7 11 3 13" fill="none"/>
+                    <path d="M12 14 Q17 11 21 13" fill="none"/>
+                </svg>
+                PolySwarm
+            </a>
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#demo">Demo</a>
+                <a href="#analysis">Analysis</a>
                 <a href="#agents">Agents</a>
-                <a href="#data">Data</a>
                 <a href="docs.html">Docs</a>
                 <a href="https://github.com/defidaddydavid/polyswarm" class="nav-github" target="_blank">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                    GitHub
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    Star
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero -->
     <section class="hero">
-        <div class="hero-badge">OPEN SOURCE</div>
-        <h1>Multi-Agent AI<br/>Forecasting Engine</h1>
+        <div class="hero-badge">OPEN SOURCE · MIT LICENSED</div>
+        <h1>Multi-Agent AI<br/><span class="gradient-text">Forecasting Engine</span></h1>
         <p class="hero-sub">Predict markets. Simulate crowds. Find your edge.</p>
-        <p class="hero-desc">12 AI agents with distinct personas debate in real-time,<br/>informed by 15+ live data feeds, to produce calibrated forecasts.</p>
+        <p class="hero-desc">12 AI agents with distinct personas debate in real-time — powered by Bayesian updating,<br/>Monte Carlo simulation, and game theory — informed by 15+ live data feeds.</p>
         <div class="hero-cta">
-            <a href="https://github.com/defidaddydavid/polyswarm" class="btn btn-primary">⭐ Star on GitHub</a>
+            <a href="https://github.com/defidaddydavid/polyswarm" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Star on GitHub
+            </a>
             <a href="#quickstart" class="btn btn-secondary">Get Started →</a>
+            <a href="docs.html" class="btn btn-ghost">Documentation</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat"><span class="stat-num">12</span><span class="stat-label">AI Agents</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat"><span class="stat-num">15+</span><span class="stat-label">Data Feeds</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat"><span class="stat-num">3</span><span class="stat-label">Aggregation Methods</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat"><span class="stat-num">∞</span><span class="stat-label">LLM Providers</span></div>
         </div>
         <div class="hero-providers">
-            Works with: <span>Claude</span> · <span>GPT-4o</span> · <span>Llama</span> · <span>Mistral</span> · <span>Any LLM</span>
+            <span>Claude</span><span class="sep">·</span><span>GPT-4o</span><span class="sep">·</span><span>Llama</span><span class="sep">·</span><span>Mistral</span><span class="sep">·</span><span>Ollama</span><span class="sep">·</span><span>Any LLM</span>
         </div>
     </section>
 
-    <!-- Terminal Demo -->
+    <!-- Modes -->
     <section class="section" id="demo">
-        <h2 class="section-title">See it in action</h2>
-        <div class="terminal">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <span class="dot red"></span>
-                    <span class="dot yellow"></span>
-                    <span class="dot green"></span>
+        <div class="modes-grid">
+            <div class="mode-card">
+                <div class="mode-header">
+                    <span class="mode-tag">FORECAST</span>
+                    <h3>Binary Probability</h3>
                 </div>
-                <span class="terminal-title">polyswarm — forecast</span>
+                <p>Ask any yes/no question. Get a calibrated probability with confidence intervals, Bayesian posterior, and edge vs market odds.</p>
+                <div class="terminal-mini">
+<pre>$ python main.py forecast "Will BTC hit $100k?" --odds 0.42
+
+<span class="t-green">Weighted:  48.7%</span> | <span class="t-cyan">Bayesian: 46.2%</span>
+95% CI: [38.1%, 57.3%]
+MC median: 47.5% | Entropy: 0.998 bits
+Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
+                </div>
             </div>
-            <div class="terminal-body">
-<pre><span class="t-prompt">$</span> <span class="t-cmd">python main.py forecast</span> <span class="t-str">"Will BTC close above $100k before June?"</span> <span class="t-flag">--odds 0.42</span>
+            <div class="mode-card">
+                <div class="mode-header">
+                    <span class="mode-tag scenario">SCENARIO</span>
+                    <h3>Crowd Simulation</h3>
+                </div>
+                <p>Feed any event. Watch 12 personas react in real-time — sentiment shifts, price impact, crowd narrative, second-order effects.</p>
+                <div class="terminal-mini">
+<pre>$ python main.py scenario "Fed cuts rates 50bps"
 
-<span class="t-dim">Fetching context... BTC $87,240 (+2.1%) | F&G: Greed (71) | Funding: +0.012%/8h</span>
-
-<span class="t-yellow">── Round 1 ──</span>
-  <span class="t-cyan">Macro Analyst</span>        →  <span class="t-green">34%</span>  (confidence: 72%)
-  <span class="t-cyan">Crypto Native</span>        →  <span class="t-green">61%</span>  (confidence: 75%)
-  <span class="t-cyan">Quant Trader</span>         →  <span class="t-green">48%</span>  (confidence: 80%)
-  <span class="t-cyan">Retail Participant</span>   →  <span class="t-green">63%</span>  (confidence: 55%)
-  <span class="t-cyan">Contrarian Skeptic</span>   →  <span class="t-green">27%</span>  (confidence: 65%)
-  <span class="t-cyan">On-Chain Analyst</span>     →  <span class="t-green">55%</span>  (confidence: 70%)
-  <span class="t-cyan">Institutional Desk</span>   →  <span class="t-green">39%</span>  (confidence: 78%)
-  <span class="t-cyan">Options Trader</span>       →  <span class="t-green">44%</span>  (confidence: 76%)
-  <span class="t-dim">... 4 more agents</span>
-
-<span class="t-yellow">── Round 2 ── (agents update after seeing each other's reasoning)</span>
-  <span class="t-dim">... beliefs shift ...</span>
-
-<span class="t-border">╔══════════════════════════════════════════════════════════╗</span>
-<span class="t-border">║</span>  <span class="t-bright">Swarm Probability:  48.7%</span>                              <span class="t-border">║</span>
-<span class="t-border">║</span>  Consensus: 58%  |  Agents: 12  |  Std Dev: 0.112       <span class="t-border">║</span>
-<span class="t-border">║</span>  Market odds: 42%  →  <span class="t-green">Edge: +6.7%</span>                        <span class="t-border">║</span>
-<span class="t-border">╚══════════════════════════════════════════════════════════╝</span></pre>
+<span class="t-green">BULLISH</span> | Sentiment: +0.52 | Impact: +8.3%
+"Risk assets rally as liquidity expectations
+ shift. BTC leads, alts follow with lag."
+→ Funding rates spike within 30 min
+→ Shorts liquidated across major pairs</pre>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="terminal" style="margin-top: 2rem;">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <span class="dot red"></span>
-                    <span class="dot yellow"></span>
-                    <span class="dot green"></span>
-                </div>
-                <span class="terminal-title">polyswarm — scenario</span>
+    <!-- Statistical Analysis -->
+    <section class="section" id="analysis">
+        <h2 class="section-title">Beyond Simple Averages</h2>
+        <p class="section-sub">Three aggregation methods. Game theory. Information theory. Real statistics.</p>
+        <div class="analysis-grid">
+            <div class="analysis-card">
+                <div class="analysis-icon">∫</div>
+                <h4>Bayesian Updating</h4>
+                <p>Each agent's estimate is treated as evidence. Beliefs update via Bayes' theorem with KL-divergence weighting. More surprising estimates carry more information.</p>
+                <code>P(H|E) = P(E|H)·P(H) / P(E)</code>
             </div>
-            <div class="terminal-body">
-<pre><span class="t-prompt">$</span> <span class="t-cmd">python main.py scenario</span> <span class="t-str">"Elon Musk tweets Tesla will accept Bitcoin again"</span>
-
-  <span class="t-cyan">Macro Analyst</span>        🟡 sentiment=<span class="t-yellow">+0.18</span>  impact=+3.2%  · monitors positioning
-  <span class="t-cyan">Crypto Native</span>        🟢 sentiment=<span class="t-green">+0.74</span>  impact=+8.5%  · buys spot BTC · CT thread
-  <span class="t-cyan">Quant Trader</span>         🟡 sentiment=<span class="t-yellow">+0.22</span>  impact=+2.1%  · checks options flow
-  <span class="t-cyan">Retail Participant</span>   🟢 sentiment=<span class="t-green">+0.81</span>  impact=+12%   · market buys · tweets "LFG"
-  <span class="t-cyan">Contrarian Skeptic</span>   🔴 sentiment=<span class="t-red">-0.15</span>  impact=-1.0%  · prepares short
-  <span class="t-dim">... 7 more agents</span>
-
-<span class="t-border">╔══════════════════════════════════════════════════════════╗</span>
-<span class="t-border">║</span>  <span class="t-green">BULLISH</span>  |  Sentiment: +0.41  |  Price Impact: +6.2%   <span class="t-border">║</span>
-<span class="t-border">║</span>  <span class="t-dim">"Retail FOMO dominates. Institutions wait for</span>          <span class="t-border">║</span>
-<span class="t-border">║</span>  <span class="t-dim"> confirmation before deploying capital."</span>                <span class="t-border">║</span>
-<span class="t-border">║</span>  → Short squeeze on BTC perpetuals within 15 min        <span class="t-border">║</span>
-<span class="t-border">║</span>  → TSLA stock gaps up at open                            <span class="t-border">║</span>
-<span class="t-border">║</span>  → Altcoins follow with 30-min lag                       <span class="t-border">║</span>
-<span class="t-border">╚══════════════════════════════════════════════════════════╝</span></pre>
+            <div class="analysis-card">
+                <div class="analysis-icon">◈</div>
+                <h4>Monte Carlo Simulation</h4>
+                <p>5,000 simulations treating each agent as a beta distribution parameterized by probability and confidence. Produces percentiles, skew, and threshold probabilities.</p>
+                <code>P(>50%) = 0.63 | Skew: -0.12</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon">⊛</div>
+                <h4>Bootstrap Confidence Intervals</h4>
+                <p>Resample agent estimates 1,000 times to produce 95% confidence intervals. Quantifies uncertainty in the swarm's consensus.</p>
+                <code>95% CI: [38.1%, 57.3%]</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon">⚔</div>
+                <h4>Herding Detection</h4>
+                <p>HHI-based clustering analysis detects when agents converge suspiciously. Flags contrarian signals when the herd is wrong.</p>
+                <code>Herding: 0.72 → contrarian signal</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon">⇌</div>
+                <h4>Information Cascades</h4>
+                <p>Tracks how beliefs shift between debate rounds. Detects when agents flip sides, who moved most, and whether convergence was genuine.</p>
+                <code>Convergence: 78% | 2 agents flipped</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon">≋</div>
+                <h4>Nash Equilibrium</h4>
+                <p>Checks if the consensus is stable — would any agent benefit from deviating? Unstable equilibria signal low-confidence forecasts.</p>
+                <code>Stability: 0.92 → consensus holds</code>
             </div>
         </div>
     </section>
 
     <!-- Features -->
     <section class="section" id="features">
-        <h2 class="section-title">How it works</h2>
+        <h2 class="section-title">Built Different</h2>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">🧠</div>
                 <h3>12 Distinct Agents</h3>
-                <p>Each agent has a unique expertise, information focus, and documented bias — creating genuine disagreement, not echo-chamber consensus.</p>
+                <p>Macro analyst, quant trader, crypto native, skeptic, options trader — each with documented biases that create genuine disagreement.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">⚔️</div>
                 <h3>Multi-Round Debate</h3>
-                <p>Agents see each other's reasoning and update beliefs across multiple rounds. Weak arguments collapse. Strong ones survive.</p>
+                <p>Agents see each other's reasoning and update beliefs. Weak arguments collapse. Strong ones survive. Information cascades are tracked.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📡</div>
                 <h3>15+ Live Data Feeds</h3>
-                <p>Every forecast is grounded in real-time data — funding rates, options flow, on-chain metrics, social sentiment, DeFi TVL — fetched in parallel.</p>
+                <p>Funding rates, options flow, DeFi TVL, on-chain metrics, social sentiment, prediction market odds — fetched in parallel.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
                 <h3>Self-Calibrating</h3>
-                <p>Brier scores track each agent's accuracy over time. Better-calibrated agents automatically receive more weight. The swarm improves.</p>
+                <p>Brier scores per agent, updated on resolution. Better agents gain weight over time. The swarm improves automatically.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🎭</div>
-                <h3>Scenario Simulation</h3>
-                <p>Not just "will X happen" — simulate what happens IF X happens. Crowd reactions, sentiment shifts, price impact, second-order effects.</p>
+                <h3>Any LLM</h3>
+                <p>Claude, GPT-4o, Llama, Mistral, Ollama — swap with one env var. Run fully local and private.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔌</div>
-                <h3>Any LLM Provider</h3>
-                <p>Claude, GPT-4o, Llama, Mistral, Ollama — swap providers with one env var. Run fully local and private if you want.</p>
+                <h3>REST API + CLI</h3>
+                <p>FastAPI server with interactive docs. Typer CLI for terminal. Docker for deployment. Integrate into any pipeline.</p>
             </div>
         </div>
     </section>
@@ -159,57 +185,57 @@
         <h2 class="section-title">The 12 Agents</h2>
         <p class="section-sub">Every agent brings a different lens. That's the point.</p>
         <div class="agents-grid">
-            <div class="agent-card"><span class="agent-emoji">📊</span><strong>Macro Analyst</strong><span class="agent-focus">Fed policy, rates, DXY</span></div>
-            <div class="agent-card"><span class="agent-emoji">₿</span><strong>Crypto Native</strong><span class="agent-focus">On-chain, funding, CT narrative</span></div>
+            <div class="agent-card"><span class="agent-emoji">📊</span><strong>Macro Analyst</strong><span class="agent-focus">Fed, rates, DXY, liquidity</span></div>
+            <div class="agent-card"><span class="agent-emoji">₿</span><strong>Crypto Native</strong><span class="agent-focus">On-chain, funding, narrative</span></div>
             <div class="agent-card"><span class="agent-emoji">📉</span><strong>Quant Trader</strong><span class="agent-focus">Base rates, vol surface</span></div>
-            <div class="agent-card"><span class="agent-emoji">📱</span><strong>Retail Participant</strong><span class="agent-focus">Price action, Reddit, FOMO</span></div>
-            <div class="agent-card"><span class="agent-emoji">🐻</span><strong>Contrarian Skeptic</strong><span class="agent-focus">Tail risks, crowded trades</span></div>
-            <div class="agent-card"><span class="agent-emoji">🔍</span><strong>On-Chain Analyst</strong><span class="agent-focus">Whale flows, exchange reserves</span></div>
-            <div class="agent-card"><span class="agent-emoji">🏦</span><strong>Institutional Desk</strong><span class="agent-focus">ETF flows, regulatory</span></div>
-            <div class="agent-card"><span class="agent-emoji">📅</span><strong>Event Specialist</strong><span class="agent-focus">FOMC, halvings, catalysts</span></div>
-            <div class="agent-card"><span class="agent-emoji">🌐</span><strong>DeFi Specialist</strong><span class="agent-focus">TVL, yields, governance</span></div>
-            <div class="agent-card"><span class="agent-emoji">⚡</span><strong>Options Trader</strong><span class="agent-focus">IV rank, skew, gamma</span></div>
-            <div class="agent-card"><span class="agent-emoji">🌍</span><strong>Geopolitical Analyst</strong><span class="agent-focus">Regulation, sanctions</span></div>
-            <div class="agent-card"><span class="agent-emoji">📡</span><strong>Social Sentiment</strong><span class="agent-focus">Reddit, Twitter, Trends</span></div>
+            <div class="agent-card"><span class="agent-emoji">📱</span><strong>Retail</strong><span class="agent-focus">Price action, Reddit, FOMO</span></div>
+            <div class="agent-card"><span class="agent-emoji">🐻</span><strong>Skeptic</strong><span class="agent-focus">Tail risks, crowded trades</span></div>
+            <div class="agent-card"><span class="agent-emoji">🔍</span><strong>On-Chain</strong><span class="agent-focus">Whale flows, reserves</span></div>
+            <div class="agent-card"><span class="agent-emoji">🏦</span><strong>Institutional</strong><span class="agent-focus">ETF flows, regulatory</span></div>
+            <div class="agent-card"><span class="agent-emoji">📅</span><strong>Events</strong><span class="agent-focus">FOMC, halvings, catalysts</span></div>
+            <div class="agent-card"><span class="agent-emoji">🌐</span><strong>DeFi</strong><span class="agent-focus">TVL, yields, governance</span></div>
+            <div class="agent-card"><span class="agent-emoji">⚡</span><strong>Options</strong><span class="agent-focus">IV, skew, gamma</span></div>
+            <div class="agent-card"><span class="agent-emoji">🌍</span><strong>Geopolitical</strong><span class="agent-focus">Regulation, sanctions</span></div>
+            <div class="agent-card"><span class="agent-emoji">📡</span><strong>Social</strong><span class="agent-focus">Reddit, Twitter, Trends</span></div>
         </div>
     </section>
 
-    <!-- Data Sources -->
+    <!-- Data -->
     <section class="section" id="data">
         <h2 class="section-title">Real Data. Not Vibes.</h2>
-        <p class="section-sub">15+ free APIs, fetched in parallel. No API keys required for most sources.</p>
+        <p class="section-sub">15+ free APIs, fetched in parallel, no API keys required.</p>
         <div class="data-grid">
             <div class="data-col">
                 <h4>Market & Derivatives</h4>
                 <ul>
-                    <li>Binance — spot prices</li>
-                    <li>Binance Futures — funding rates</li>
-                    <li>Binance Futures — open interest</li>
-                    <li>Binance Futures — long/short ratios</li>
-                    <li>Binance Futures — top trader positions</li>
-                    <li>Binance Futures — liquidations</li>
+                    <li>Binance spot (BTC, ETH, SOL)</li>
+                    <li>Funding rates (6 assets)</li>
+                    <li>Open interest</li>
+                    <li>Long/short ratios</li>
+                    <li>Top trader positions</li>
+                    <li>Liquidation data</li>
                 </ul>
             </div>
             <div class="data-col">
                 <h4>On-Chain & DeFi</h4>
                 <ul>
-                    <li>Deribit — BTC options, put/call ratio</li>
-                    <li>DeFi Llama — TVL + top protocols</li>
-                    <li>DeFi Llama — stablecoin supply</li>
-                    <li>Mempool.space — BTC mempool + fees</li>
-                    <li>Blockchain.info — BTC hashrate</li>
-                    <li>Etherscan — ETH gas prices</li>
+                    <li>Deribit options + put/call</li>
+                    <li>DeFi Llama TVL + protocols</li>
+                    <li>Stablecoin supply</li>
+                    <li>BTC mempool + fees</li>
+                    <li>BTC hashrate</li>
+                    <li>ETH gas prices</li>
                 </ul>
             </div>
             <div class="data-col">
-                <h4>Sentiment & Social</h4>
+                <h4>Sentiment & Markets</h4>
                 <ul>
-                    <li>Fear & Greed Index (7-day)</li>
+                    <li>Fear & Greed (7-day)</li>
                     <li>Reddit r/cryptocurrency</li>
-                    <li>CoinGecko trending coins</li>
+                    <li>CoinGecko trending</li>
                     <li>CryptoPanic headlines</li>
-                    <li>Polymarket trending</li>
-                    <li>Manifold Markets trending</li>
+                    <li>Polymarket odds</li>
+                    <li>Manifold Markets</li>
                 </ul>
             </div>
         </div>
@@ -217,7 +243,7 @@
 
     <!-- Quickstart -->
     <section class="section" id="quickstart">
-        <h2 class="section-title">Get Started in 60 Seconds</h2>
+        <h2 class="section-title">60 Seconds to First Forecast</h2>
         <div class="terminal">
             <div class="terminal-header">
                 <div class="terminal-dots">
@@ -228,59 +254,19 @@
                 <span class="terminal-title">terminal</span>
             </div>
             <div class="terminal-body">
-<pre><span class="t-comment"># Clone & install</span>
+<pre><span class="t-comment"># Install</span>
 <span class="t-prompt">$</span> git clone https://github.com/defidaddydavid/polyswarm.git
 <span class="t-prompt">$</span> cd polyswarm && pip install -r requirements.txt
+<span class="t-prompt">$</span> cp .env.example .env  <span class="t-comment"># add your API key</span>
 
-<span class="t-comment"># Add your API key</span>
-<span class="t-prompt">$</span> cp .env.example .env
+<span class="t-comment"># Forecast</span>
+<span class="t-prompt">$</span> python main.py forecast <span class="t-str">"Will BTC hit $100k?"</span> --odds 0.45
 
-<span class="t-comment"># Run your first forecast</span>
-<span class="t-prompt">$</span> python main.py forecast <span class="t-str">"Will BTC hit $100k before July?"</span> --odds 0.45
-
-<span class="t-comment"># Or simulate a scenario</span>
+<span class="t-comment"># Simulate</span>
 <span class="t-prompt">$</span> python main.py scenario <span class="t-str">"SEC bans crypto staking"</span>
 
-<span class="t-comment"># Or start the API server</span>
-<span class="t-prompt">$</span> python main.py serve
-<span class="t-dim">→ http://localhost:8000/docs</span></pre>
-            </div>
-        </div>
-    </section>
-
-    <!-- Use Cases -->
-    <section class="section" id="usecases">
-        <h2 class="section-title">Use Cases</h2>
-        <div class="usecases-grid">
-            <div class="usecase">
-                <span class="usecase-icon">💰</span>
-                <h4>Prediction Market Edge</h4>
-                <p>Find +EV bets vs Polymarket odds</p>
-            </div>
-            <div class="usecase">
-                <span class="usecase-icon">📅</span>
-                <h4>Event Trading</h4>
-                <p>FOMC, ETF decisions, halvings</p>
-            </div>
-            <div class="usecase">
-                <span class="usecase-icon">💥</span>
-                <h4>Black Swan Simulation</h4>
-                <p>"What if Exchange X goes insolvent?"</p>
-            </div>
-            <div class="usecase">
-                <span class="usecase-icon">📈</span>
-                <h4>Options Positioning</h4>
-                <p>Validate bias before buying calls/puts</p>
-            </div>
-            <div class="usecase">
-                <span class="usecase-icon">🤖</span>
-                <h4>Signal Pipeline</h4>
-                <p>Feed swarm output into trading algos</p>
-            </div>
-            <div class="usecase">
-                <span class="usecase-icon">🛡️</span>
-                <h4>Risk Management</h4>
-                <p>Simulate tail events before they happen</p>
+<span class="t-comment"># API server</span>
+<span class="t-prompt">$</span> python main.py serve  <span class="t-comment"># → localhost:8000/docs</span></pre>
             </div>
         </div>
     </section>
@@ -288,17 +274,23 @@
     <!-- CTA -->
     <section class="section cta-section">
         <h2>Ready to find your edge?</h2>
-        <p>MIT Licensed. Open source. Run it locally or in the cloud.</p>
+        <p>MIT Licensed. Open source. Run locally or in the cloud.</p>
         <div class="hero-cta">
             <a href="https://github.com/defidaddydavid/polyswarm" class="btn btn-primary">View on GitHub</a>
             <a href="docs.html" class="btn btn-secondary">Read the Docs →</a>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-inner">
-            <span>🐝 PolySwarm</span>
+            <span class="footer-logo">
+                <svg class="dragonfly-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="22" stroke-width="1.5"/>
+                    <path d="M12 10 Q6 6 2 8" fill="none"/><path d="M12 10 Q18 6 22 8" fill="none"/>
+                    <path d="M12 14 Q7 11 3 13" fill="none"/><path d="M12 14 Q17 11 21 13" fill="none"/>
+                </svg>
+                PolySwarm
+            </span>
             <span>Built by <a href="https://github.com/defidaddydavid">@defidaddydavid</a></span>
             <span>MIT License</span>
         </div>

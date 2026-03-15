@@ -5,14 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PolySwarm — Documentation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="docs.css">
 </head>
 <body>
     <nav class="nav">
         <div class="nav-inner">
-            <a href="index.html" class="nav-logo">🐝 PolySwarm</a>
+            <a href="index.html" class="nav-logo">
+                <svg class="dragonfly-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="5" r="2"/>
+                    <line x1="12" y1="7" x2="12" y2="22" stroke-width="1.5"/>
+                    <path d="M12 10 Q6 6 2 8" fill="none"/>
+                    <path d="M12 10 Q18 6 22 8" fill="none"/>
+                    <path d="M12 14 Q7 11 3 13" fill="none"/>
+                    <path d="M12 14 Q17 11 21 13" fill="none"/>
+                </svg>
+                PolySwarm
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="#installation">Install</a>
@@ -20,7 +30,7 @@
                 <a href="#cli">CLI</a>
                 <a href="#api-ref">API</a>
                 <a href="https://github.com/defidaddydavid/polyswarm" class="nav-github" target="_blank">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                     GitHub
                 </a>
             </div>
@@ -42,6 +52,16 @@
                 <a href="#agents-detail">Agents</a>
                 <a href="#calibration">Calibration</a>
                 <a href="#context-engine">Context Engine</a>
+            </div>
+            <div class="sidebar-section">
+                <h4>Statistical Analysis</h4>
+                <a href="#bayesian">Bayesian Updating</a>
+                <a href="#monte-carlo">Monte Carlo Simulation</a>
+                <a href="#bootstrap">Bootstrap CI</a>
+                <a href="#game-theory">Game Theory</a>
+                <a href="#herding">Herding Detection</a>
+                <a href="#cascades">Information Cascades</a>
+                <a href="#nash">Nash Equilibrium</a>
             </div>
             <div class="sidebar-section">
                 <h4>CLI Reference</h4>
@@ -130,8 +150,9 @@ cp .env.example .env</code></pre>
                     <li><strong>Context injection</strong> — 15+ live data sources are fetched in parallel</li>
                     <li><strong>Round 1</strong> — each agent independently forms a probability estimate + reasoning</li>
                     <li><strong>Round 2+</strong> — agents see each other's estimates and can update or defend</li>
-                    <li><strong>Aggregation</strong> — confidence-weighted average, adjusted by historical calibration</li>
-                    <li><strong>Edge calculation</strong> — if market odds are provided, the edge is computed</li>
+                    <li><strong>Aggregation</strong> — three methods: confidence-weighted average, Bayesian posterior, and Monte Carlo simulation</li>
+                    <li><strong>Analysis</strong> — herding detection, information cascade tracking, Nash equilibrium check</li>
+                    <li><strong>Edge calculation</strong> — if market odds are provided, the edge is computed for all methods</li>
                 </ol>
             </section>
 
@@ -191,6 +212,102 @@ python main.py calibration</code></pre>
 python main.py context</code></pre>
                 </div>
                 <p>Data sources include: Binance spot + futures, Deribit options, DeFi Llama, CoinGecko, Fear & Greed, Reddit, CryptoPanic, Polymarket, Manifold, Mempool.space, Etherscan, and Blockchain.info.</p>
+            </section>
+
+            <!-- Statistical Analysis -->
+            <section id="bayesian">
+                <h2>Bayesian Updating</h2>
+                <p>Module: <code>core/bayesian.py</code></p>
+                <p>Instead of simple averaging, PolySwarm treats each agent's estimate as <strong>evidence</strong> and updates a prior belief using Bayes' theorem. The key innovation is <strong>information-theoretic weighting</strong>: agents whose estimates are more surprising (higher KL divergence from the current posterior) carry more weight in the update.</p>
+                <h3>How it works</h3>
+                <ol>
+                    <li>Start with a prior (market odds if available, otherwise 0.5)</li>
+                    <li>For each agent, compute the KL divergence between their estimate and the current posterior</li>
+                    <li>Weight the Bayesian update by <code>confidence * (1 + KL divergence)</code></li>
+                    <li>Apply the likelihood ratio update: <code>P(H|E) = P(E|H) * P(H) / P(E)</code></li>
+                </ol>
+                <h3>Output fields</h3>
+                <ul>
+                    <li><code>bayesian_probability</code> — the posterior probability after all agent updates</li>
+                    <li><code>bayesian_shift</code> — difference between Bayesian posterior and simple mean</li>
+                    <li><code>entropy</code> — Shannon entropy of the posterior (bits). Lower = more certain</li>
+                    <li><code>information_gain</code> — entropy reduction from prior to posterior (bits)</li>
+                </ul>
+                <div class="code-block">
+                    <pre><code>from core.bayesian import bayesian_aggregate
+result = bayesian_aggregate(estimates, prior=0.42)
+# result["bayesian_probability"] → 0.487
+# result["information_gain"] → 0.031 bits</code></pre>
+                </div>
+            </section>
+
+            <section id="monte-carlo">
+                <h2>Monte Carlo Simulation</h2>
+                <p>Module: <code>core/statistics.py</code></p>
+                <p>Runs <strong>5,000 simulations</strong> where each agent's estimate is treated as a beta distribution parameterized by their probability and confidence. Higher confidence = tighter distribution around their estimate.</p>
+                <h3>Output fields</h3>
+                <ul>
+                    <li><code>percentiles</code> — p5, p10, p25, p50, p75, p90, p95</li>
+                    <li><code>thresholds</code> — P(>25%), P(>50%), P(>75%)</li>
+                    <li><code>mean</code>, <code>std</code>, <code>skew</code> — distribution moments</li>
+                </ul>
+                <div class="code-block">
+                    <pre><code>from core.statistics import monte_carlo_scenarios
+mc = monte_carlo_scenarios(estimates, n_simulations=5000)
+# mc["percentiles"]["p50"] → 0.472
+# mc["thresholds"]["P(>50%)"] → 0.43</code></pre>
+                </div>
+            </section>
+
+            <section id="bootstrap">
+                <h2>Bootstrap Confidence Intervals</h2>
+                <p>Module: <code>core/statistics.py</code></p>
+                <p>Resamples the agent estimates <strong>1,000 times</strong> with replacement to produce a 95% confidence interval for the swarm's probability estimate. This quantifies how uncertain the consensus is.</p>
+                <div class="code-block">
+                    <pre><code>from core.statistics import bootstrap_confidence_interval
+ci = bootstrap_confidence_interval(estimates)
+# ci["ci_lower"] → 0.381, ci["ci_upper"] → 0.573
+# ci["ci_width"] → 0.192 (wide = high uncertainty)</code></pre>
+                </div>
+            </section>
+
+            <section id="game-theory">
+                <h2>Game Theory</h2>
+                <p>Module: <code>core/game_theory.py</code></p>
+                <p>Three game-theoretic analyses run on every forecast to detect pathological agent behavior.</p>
+            </section>
+
+            <section id="herding">
+                <h2>Herding Detection</h2>
+                <p>Uses the <strong>Herfindahl-Hirschman Index (HHI)</strong> adapted for probability space. Buckets agent estimates into quintiles and measures concentration. Under independent reasoning, agents should be spread across buckets. High HHI = suspicious clustering.</p>
+                <ul>
+                    <li><code>herding_score</code> — 0 to 1 (>0.3 = herding detected)</li>
+                    <li><code>herd_direction</code> — bullish/bearish/neutral when herding is detected</li>
+                    <li><code>contrarians</code> — agents >1.5 std devs from mean (potential signal)</li>
+                    <li><code>contrarian_signal</code> — true when herding + contrarians exist</li>
+                </ul>
+            </section>
+
+            <section id="cascades">
+                <h2>Information Cascades</h2>
+                <p>Compares Round 1 and Round 2 estimates to detect whether agents converged genuinely or just followed the herd.</p>
+                <ul>
+                    <li><code>convergence_rate</code> — fraction of agents that moved toward consensus</li>
+                    <li><code>cascade_detected</code> — true when convergence > 70%</li>
+                    <li><code>flipped_agents</code> — agents who changed sides (crossed 50%)</li>
+                    <li><code>biggest_movers</code> — top 3 agents by absolute probability shift</li>
+                </ul>
+            </section>
+
+            <section id="nash">
+                <h2>Nash Equilibrium</h2>
+                <p>Checks whether the consensus is <strong>stable</strong> — would any agent benefit from deviating? An agent is a potential deviator if their estimate is >15% from consensus AND their confidence is >70%.</p>
+                <ul>
+                    <li><code>stable</code> — true if no agent has incentive to deviate</li>
+                    <li><code>stability_score</code> — 0 to 1 (fraction of non-deviating agents)</li>
+                    <li><code>potential_deviators</code> — list of agents with high-confidence divergent views</li>
+                </ul>
+                <p>Unstable equilibria signal low-confidence forecasts where the consensus may not hold.</p>
             </section>
 
             <!-- CLI Reference -->
@@ -260,7 +377,7 @@ python main.py context</code></pre>
   "market_odds": 0.25,
   "rounds": 2
 }</code></pre></div>
-                    <p>Returns: swarm probability, consensus score, individual agent estimates, edge vs market.</p>
+                    <p>Returns: swarm probability, Bayesian posterior, Monte Carlo percentiles, confidence interval, consensus score, individual agent estimates, herding analysis, Nash stability, edge vs market.</p>
                 </div>
 
                 <div id="api-scenario" class="api-endpoint">
@@ -366,7 +483,14 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key docker compose up</code></pre></div>
 
     <footer class="footer">
         <div class="footer-inner">
-            <span>🐝 PolySwarm</span>
+            <span class="footer-logo">
+                <svg class="dragonfly-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="22" stroke-width="1.5"/>
+                    <path d="M12 10 Q6 6 2 8" fill="none"/><path d="M12 10 Q18 6 22 8" fill="none"/>
+                    <path d="M12 14 Q7 11 3 13" fill="none"/><path d="M12 14 Q17 11 21 13" fill="none"/>
+                </svg>
+                PolySwarm
+            </span>
             <span>Built by <a href="https://github.com/defidaddydavid">@defidaddydavid</a></span>
             <span>MIT License</span>
         </div>
