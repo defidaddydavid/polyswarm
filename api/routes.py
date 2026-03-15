@@ -133,6 +133,26 @@ async def forecasts(limit: int = 50, _=Depends(verify_api_key)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/sources")
+async def sources():
+    """List all registered data sources and their status."""
+    from data.context import list_sources
+    source_list = list_sources()
+    available = sum(1 for s in source_list if s["available"])
+    return {
+        "sources": source_list,
+        "total": len(source_list),
+        "available": available,
+    }
+
+
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.6.0", "agents": 12}
+    from data.context import list_sources
+    source_list = list_sources()
+    return {
+        "status": "ok",
+        "version": "0.7.0",
+        "agents": 12,
+        "data_sources": sum(1 for s in source_list if s["available"]),
+    }

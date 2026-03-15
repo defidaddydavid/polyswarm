@@ -226,7 +226,7 @@ Every agent has a unique lens, information focus, and documented bias — creati
 
 ## Live Data Sources
 
-Every forecast is grounded in **real-time data from 15+ free APIs** — fetched in parallel, no API keys required.
+Every forecast is grounded in **real-time data from 23 sources** — fetched in parallel via a **modular plugin system**. Most sources work without API keys; optional keys unlock higher rate limits.
 
 <table>
 <tr>
@@ -234,6 +234,8 @@ Every forecast is grounded in **real-time data from 15+ free APIs** — fetched 
 
 **Market Data**
 - Binance — BTC, ETH, SOL spot
+- Binance — Top movers (24h)
+- CoinGecko — Market overview
 - Binance Futures — funding rates (6 assets)
 - Binance Futures — open interest
 - Binance Futures — long/short ratios
@@ -244,7 +246,7 @@ Every forecast is grounded in **real-time data from 15+ free APIs** — fetched 
 <td width="33%" valign="top">
 
 **On-Chain & DeFi**
-- Deribit — BTC options OI, put/call ratio
+- Deribit — BTC options + volatility
 - DeFi Llama — total TVL + top protocols
 - DeFi Llama — stablecoin supply
 - Mempool.space — BTC mempool + fees
@@ -254,21 +256,49 @@ Every forecast is grounded in **real-time data from 15+ free APIs** — fetched 
 </td>
 <td width="33%" valign="top">
 
-**Sentiment & Social**
+**Sentiment & Prediction**
 - Fear & Greed Index (7-day)
 - Reddit r/cryptocurrency
-- CoinGecko trending + market overview
+- CoinGecko trending coins
 - CryptoPanic headlines
-- Polymarket trending markets
-- Manifold Markets trending
+- Polymarket trending + search
+- Manifold Markets trending + search
 
 </td>
 </tr>
 </table>
 
+### Adding Your Own Data Source
+
+PolySwarm uses a **plugin-based registry** — add a new source with zero changes to existing code:
+
+```python
+# data/sources/my_source.py
+from data.registry import DataSource, register_source
+
+@register_source
+class MySource(DataSource):
+    name = "my_source"
+    category = "sentiment"
+    description = "My custom data feed"
+    requires_key = "MY_API_KEY"  # None if no key needed
+
+    def fetch(self) -> str:
+        resp = self.http.get("https://api.example.com/data")
+        return f"My Data: {resp.json()['value']}"
+```
+
+That's it. Drop the file in `data/sources/`, and it's automatically discovered and included.
+
 ```bash
 # See everything the agents see:
 python main.py context
+
+# List all sources and their status:
+python main.py sources
+
+# Filter to specific sources:
+POLYSWARM_SOURCES=binance_spot,funding_rates,fear_greed python main.py forecast "..."
 ```
 
 <br />
@@ -279,9 +309,10 @@ python main.py context
 # Start server
 python main.py serve
 
-# Forecast
+# Forecast (with optional API key auth)
 curl -X POST http://localhost:8000/forecast \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_key" \
   -d '{"question": "Will BTC hit $150k in 2026?", "market_odds": 0.25}'
 
 # Scenario simulation
@@ -294,12 +325,20 @@ curl -X POST http://localhost:8000/resolve \
   -H "Content-Type: application/json" \
   -d '{"question": "Will BTC hit $150k in 2026?", "outcome": 1.0}'
 
+# Forecast history
+curl http://localhost:8000/forecasts?limit=20
+
 # Calibration leaderboard
 curl http://localhost:8000/calibration
 
 # List all agents
 curl http://localhost:8000/agents
+
+# Data source status
+curl http://localhost:8000/sources
 ```
+
+Set `POLYSWARM_API_KEY` in `.env` to require `X-API-Key` header on protected endpoints.
 
 Full interactive docs at `http://localhost:8000/docs`
 
@@ -339,12 +378,16 @@ python main.py calibration
 
 ## Roadmap
 
+- [x] Modular plugin-based data pipeline
+- [x] API key authentication
+- [x] Forecast history & calibration export
+- [x] 7 peer-reviewed aggregation methods
 - [ ] Live Polymarket sync + auto-compare leaderboard
 - [ ] Web UI with real-time debate viewer
 - [ ] Agent memory persistence (Redis)
 - [ ] Streaming API — watch agents think live
 - [ ] Telegram & Discord bot
-- [ ] More data (Glassnode, Santiment, Nansen)
+- [ ] More data sources (Glassnode, Santiment, Nansen — just drop a plugin!)
 - [ ] Custom persona builder
 - [ ] Backtesting against historical market resolutions
 

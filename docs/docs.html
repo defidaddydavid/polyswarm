@@ -551,25 +551,72 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key docker compose up</code></pre></div>
 
             <section id="data-sources">
                 <h2>Data Sources</h2>
-                <p>All data is fetched in parallel via ThreadPoolExecutor (12 workers, 15s timeout). All sources are free and require no API key.</p>
+                <p>PolySwarm uses a <strong>modular plugin architecture</strong> for data sources. All sources are fetched in parallel via ThreadPoolExecutor (12 workers, 15s timeout). Sources auto-discover API keys from environment variables.</p>
+
+                <h3>Registered Sources</h3>
                 <table class="docs-table">
-                    <thead><tr><th>Source</th><th>Module</th><th>Data</th></tr></thead>
+                    <thead><tr><th>Source</th><th>Module</th><th>API Key</th><th>Data</th></tr></thead>
                     <tbody>
-                        <tr><td>Binance</td><td>data/context.py</td><td>BTC, ETH, SOL spot prices + 24h change</td></tr>
-                        <tr><td>Binance Futures</td><td>data/derivatives.py</td><td>Funding rates (6 assets), OI, L/S ratios, top trader positions, liquidations</td></tr>
-                        <tr><td>Deribit</td><td>data/derivatives.py</td><td>BTC options OI, put/call ratio, historical vol</td></tr>
-                        <tr><td>DeFi Llama</td><td>data/onchain.py</td><td>Total TVL, top 10 protocols, stablecoin supply</td></tr>
-                        <tr><td>Mempool.space</td><td>data/onchain.py</td><td>BTC mempool size, recommended fees</td></tr>
-                        <tr><td>Blockchain.info</td><td>data/onchain.py</td><td>BTC hashrate</td></tr>
-                        <tr><td>Etherscan</td><td>data/onchain.py</td><td>ETH gas prices (safe/propose/fast)</td></tr>
-                        <tr><td>Alternative.me</td><td>data/news.py</td><td>Fear & Greed Index (7-day history)</td></tr>
-                        <tr><td>CryptoPanic</td><td>data/news.py</td><td>Latest crypto headlines</td></tr>
-                        <tr><td>CoinGecko</td><td>data/social.py</td><td>Trending coins, global market overview, BTC dominance</td></tr>
-                        <tr><td>Reddit</td><td>data/social.py</td><td>r/cryptocurrency hot posts</td></tr>
-                        <tr><td>Polymarket</td><td>data/prediction_markets.py</td><td>Trending markets + question-specific search</td></tr>
-                        <tr><td>Manifold</td><td>data/prediction_markets.py</td><td>Trending markets + question-specific search</td></tr>
+                        <tr><td>binance_spot</td><td>data/sources/market.py</td><td>—</td><td>BTC, ETH, SOL spot prices + 24h change</td></tr>
+                        <tr><td>binance_movers</td><td>data/sources/market.py</td><td>—</td><td>Top 5 gainers/losers in last 24h</td></tr>
+                        <tr><td>coingecko_market</td><td>data/sources/market.py</td><td>COINGECKO_API_KEY*</td><td>Global market overview, BTC dominance</td></tr>
+                        <tr><td>funding_rates</td><td>data/sources/derivatives_src.py</td><td>—</td><td>Funding rates for 6 major perpetuals</td></tr>
+                        <tr><td>open_interest</td><td>data/sources/derivatives_src.py</td><td>—</td><td>BTC/ETH open interest</td></tr>
+                        <tr><td>long_short_ratio</td><td>data/sources/derivatives_src.py</td><td>—</td><td>Global long/short ratio</td></tr>
+                        <tr><td>top_traders</td><td>data/sources/derivatives_src.py</td><td>—</td><td>Top trader position ratios</td></tr>
+                        <tr><td>liquidations</td><td>data/sources/derivatives_src.py</td><td>—</td><td>Recent forced liquidations</td></tr>
+                        <tr><td>btc_options</td><td>data/sources/derivatives_src.py</td><td>—</td><td>Deribit BTC options OI, put/call ratio</td></tr>
+                        <tr><td>btc_vol</td><td>data/sources/derivatives_src.py</td><td>—</td><td>Deribit BTC historical volatility</td></tr>
+                        <tr><td>btc_mempool</td><td>data/sources/onchain_src.py</td><td>—</td><td>BTC mempool size, pending tx count</td></tr>
+                        <tr><td>btc_fees</td><td>data/sources/onchain_src.py</td><td>—</td><td>BTC recommended fee levels</td></tr>
+                        <tr><td>btc_hashrate</td><td>data/sources/onchain_src.py</td><td>—</td><td>BTC network hashrate</td></tr>
+                        <tr><td>eth_gas</td><td>data/sources/onchain_src.py</td><td>ETHERSCAN_API_KEY*</td><td>ETH gas prices (safe/propose/fast)</td></tr>
+                        <tr><td>defi_tvl</td><td>data/sources/onchain_src.py</td><td>—</td><td>Total DeFi TVL</td></tr>
+                        <tr><td>top_protocols</td><td>data/sources/onchain_src.py</td><td>—</td><td>Top 10 DeFi protocols by TVL</td></tr>
+                        <tr><td>stablecoin_supply</td><td>data/sources/onchain_src.py</td><td>—</td><td>Total stablecoin supply</td></tr>
+                        <tr><td>fear_greed</td><td>data/sources/sentiment.py</td><td>—</td><td>Fear & Greed Index (7-day history)</td></tr>
+                        <tr><td>reddit_crypto</td><td>data/sources/sentiment.py</td><td>—</td><td>r/cryptocurrency hot posts</td></tr>
+                        <tr><td>coingecko_trending</td><td>data/sources/sentiment.py</td><td>—</td><td>Trending coins on CoinGecko</td></tr>
+                        <tr><td>cryptopanic</td><td>data/sources/sentiment.py</td><td>CRYPTOPANIC_API_KEY*</td><td>Latest crypto headlines</td></tr>
+                        <tr><td>polymarket</td><td>data/sources/prediction.py</td><td>—</td><td>Trending markets + question-specific search</td></tr>
+                        <tr><td>manifold</td><td>data/sources/prediction.py</td><td>—</td><td>Trending markets + question-specific search</td></tr>
                     </tbody>
                 </table>
+                <p class="docs-note">* Optional — source works without key but may be rate-limited. Set in <code>.env</code>.</p>
+
+                <h3>Adding a Custom Data Source</h3>
+                <p>Create a new file in <code>data/sources/</code> and it will be auto-discovered:</p>
+                <pre><code># data/sources/my_custom.py
+from data.registry import DataSource, register_source
+
+@register_source
+class MyCustomSource(DataSource):
+    name = "my_custom"
+    category = "sentiment"
+    description = "My custom data feed"
+    requires_key = "MY_API_KEY"  # optional, set None if no key needed
+    priority = 50                # 0-100, higher = shown first
+    timeout = 10                 # request timeout in seconds
+
+    def fetch(self) -&gt; str:
+        resp = self.http.get("https://api.example.com/data")
+        data = resp.json()
+        return f"My Custom Data: {data['value']}"
+
+    # Optional: implement search() for question-specific queries
+    def search(self, question: str) -&gt; str:
+        resp = self.http.get(f"https://api.example.com/search?q={question}")
+        return f"Related: {resp.json()}"</code></pre>
+                <p>That's it. No other files need modification. The registry auto-discovers the source on import.</p>
+
+                <h3>Source Filtering</h3>
+                <p>Whitelist specific sources via environment variable:</p>
+                <pre><code>POLYSWARM_SOURCES=binance_spot,funding_rates,fear_greed,btc_options</code></pre>
+                <p>When set, only the listed sources will be fetched. When unset, all available sources run.</p>
+
+                <h3>CLI Source Status</h3>
+                <pre><code>python main.py sources</code></pre>
+                <p>Shows all registered sources with their status (ready, needs key, disabled) and priority.</p>
             </section>
 
             <section id="limitations">
@@ -578,9 +625,9 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key docker compose up</code></pre></div>
                     <li><strong>Bootstrap CI at n=12</strong> — Bootstrapping over 12 agent estimates has limited statistical power. CIs reflect resampling noise as much as genuine uncertainty.</li>
                     <li><strong>HHI herding at n=12</strong> — The Herfindahl-Hirschman Index with 5 quintiles and 12 agents gives coarse resolution. Herding scores between 0.3-0.5 should be interpreted cautiously.</li>
                     <li><strong>Agent memory is in-memory</strong> — Memory accumulates within a session but resets on process restart. Redis persistence is planned.</li>
-                    <li><strong>No API authentication</strong> — The REST API has no auth layer. Do not expose to untrusted networks without a reverse proxy.</li>
+                    <li><strong>Optional API authentication</strong> — Set <code>POLYSWARM_API_KEY</code> env var to require <code>X-API-Key</code> header on protected endpoints. Without it, the API is open.</li>
                     <li><strong>Current-state data only</strong> — Data sources provide snapshots, not historical trends (no 7d/30d deltas).</li>
-                    <li><strong>BTC/ETH/SOL only</strong> — Spot price data covers three assets. Extend <code>data/context.py</code> to add more.</li>
+                    <li><strong>BTC/ETH/SOL only</strong> — Spot price data covers three assets. Add more by creating a new source in <code>data/sources/</code>.</li>
                     <li><strong>SP meta-predictions are estimated</strong> — Without explicit second-order predictions from agents, the Surprisingly Popular algorithm uses a confidence-based heuristic.</li>
                     <li><strong>No streaming</strong> — Multi-round debates can take 30-60+ seconds. No real-time progress output in the API (CLI shows per-agent status).</li>
                 </ul>

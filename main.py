@@ -156,5 +156,35 @@ def history(
     console.print(table)
 
 
+@app.command()
+def sources():
+    """List all registered data sources and their status."""
+    from data.context import list_sources
+    from rich.table import Table
+    from rich import box
+
+    source_list = list_sources()
+    table = Table(title="Data Sources", box=box.ROUNDED)
+    table.add_column("Name", style="cyan")
+    table.add_column("Category")
+    table.add_column("Status", justify="center")
+    table.add_column("Key Required")
+    table.add_column("Priority", justify="right")
+    table.add_column("Description", style="dim")
+
+    for s in source_list:
+        if s["available"]:
+            status = "[green]ready[/green]"
+        elif not s["has_key"]:
+            status = f"[yellow]needs {s['requires_key']}[/yellow]"
+        else:
+            status = "[red]disabled[/red]"
+        key = s["requires_key"] or "—"
+        table.add_row(s["name"], s["category"], status, key, str(s["priority"]), s["description"])
+
+    console.print(table)
+    console.print(f"\n[dim]Filter with POLYSWARM_SOURCES=name1,name2 env var[/dim]")
+
+
 if __name__ == "__main__":
     app()
