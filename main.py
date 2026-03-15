@@ -8,7 +8,7 @@ Usage:
   python main.py scenario "SEC approves spot ETH ETF options" --context "ETH currently at $3,200"
   python main.py resolve "Will BTC close above $100k on March 31 2026?" --outcome 1.0
   python main.py serve
-  python main.py calibration
+  python main.py calibration --export json
 """
 
 import typer
@@ -75,11 +75,24 @@ def serve(
 
 
 @app.command()
-def calibration():
+def calibration(
+    export: str = typer.Option(None, "--export", help="Export format: json or csv"),
+    output: str = typer.Option(None, "--output", "-o", help="Output file path (default: stdout)"),
+):
     """Show current calibration scores across all agents."""
-    from core.calibration import get_swarm_brier_score, get_agent_brier_scores
+    from core.calibration import get_swarm_brier_score, get_agent_brier_scores, export_calibration
     from rich.table import Table
     from rich import box
+
+    if export:
+        data = export_calibration(format=export)
+        if output:
+            with open(output, "w") as f:
+                f.write(data)
+            console.print(f"[green]✓ Exported to {output}[/green]")
+        else:
+            console.print(data)
+        return
 
     swarm_score = get_swarm_brier_score()
     agent_scores = get_agent_brier_scores()
@@ -92,8 +105,9 @@ def calibration():
         table.add_column("Brier Score", justify="right")
         table.add_column("Quality")
         for agent_id, score in sorted(agent_scores.items(), key=lambda x: x[1]):
-            quality = "🟢 Excellent" if score < 0.1 else "🟡 Good" if score < 0.2 else "🔴 Poor"
-            table.add_row(agent_id, f"{score:.4f}", quality)
+            quality = "Excellent" if score < 0.1 else "Good" if score < 0.2 else "Poor"
+            color = "green" if score < 0.1 else "yellow" if score < 0.2 else "red"
+            table.add_row(agent_id, f"{score:.4f}", f"[{color}]{quality}[/{color}]")
         console.print(table)
 
 
@@ -108,6 +122,38 @@ def context(
     console.print("[bold]Fetching all data sources...[/bold]\n")
     ctx = build_context(question)
     console.print(Panel(ctx, title="Agent Context (Live Data)", border_style="cyan"))
+
+
+@app.command()
+def history(
+    limit: int = typer.Option(20, "--limit", "-n", help="Number of recent forecasts to show"),
+):
+    """Show past forecast history."""
+    from core.calibration import get_forecast_history
+    from rich.table import Table
+    from rich import box
+
+    forecasts = get_forecast_history(limit=limit)
+    if not forecasts:
+        console.print("[dim]No forecasts yet.[/dim]")
+        return
+
+    table = Table(title=f"Forecast History (last {limit})", box=box.ROUNDED)
+    table.add_column("Question", style="cyan", max_width=50)
+    table.add_column("P", justify="right", style="green")
+    table.add_column("Market", justify="right")
+    table.add_column("Status")
+    table.add_column("Brier", justify="right")
+    table.add_column("Date", style="dim")
+
+    for f in forecasts:
+        status = f"[green]✓ {f['outcome']:.0f}[/green]" if f["status"] == "resolved" else "[dim]pending[/dim]"
+        market = f"{f['market_odds']:.0%}" if f["market_odds"] else "—"
+        brier = f"{f['brier_score']:.4f}" if f["brier_score"] is not None else "—"
+        date = f["created_at"][:10] if f["created_at"] else "—"
+        table.add_row(f["question"][:50], f"{f['probability']:.1%}", market, status, brier, date)
+
+    console.print(table)
 
 
 if __name__ == "__main__":

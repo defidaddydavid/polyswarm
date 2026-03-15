@@ -18,6 +18,8 @@ from core.statistics import bootstrap_confidence_interval, monte_carlo_scenarios
 from core.extremize import extremize
 from core.surprisingly_popular import surprisingly_popular
 from core.opinion_pool import logarithmic_opinion_pool, cooke_classical_weights
+from core.meta_probability import meta_probability_weight, neutral_pivot
+from core.coherence import coherence_check
 from core.calibration import (
     init_db,
     save_forecast,
@@ -142,6 +144,24 @@ class Swarm:
         cooke = cooke_classical_weights(all_estimates, calibration_weights)
         result["cooke_classical"] = cooke
         console.print(f"  [dim]Cooke's Classical:[/dim] [bold]{cooke['cooke_probability']:.1%}[/bold] ({cooke['n_qualified']}/{len(all_estimates)} agents qualified)")
+
+        # 13. Meta-Probability Weighting (Palley & Satopää 2023)
+        mpw = meta_probability_weight(all_estimates)
+        result["meta_probability"] = mpw
+        console.print(f"  [dim]Meta-Prob Weight:[/dim] [bold]{mpw['mpw_probability']:.1%}[/bold] (top signal: {mpw['top_signal_agents'][0]['agent']})")
+
+        # 14. Neutral Pivoting (shared-information correction)
+        pivot = neutral_pivot(all_estimates)
+        result["neutral_pivot"] = pivot
+        console.print(f"  [dim]Neutral Pivot:[/dim] [bold]{pivot['pivoted_probability']:.1%}[/bold] (shift: {pivot['pivot_shift']:+.3f})")
+
+        # 15. Coherence check
+        coherence = coherence_check(all_estimates)
+        result["coherence"] = coherence
+        if coherence["n_incoherent"] > 0:
+            console.print(f"  [yellow]⚠ {coherence['n_incoherent']} incoherent agents[/yellow] (mean coherence: {coherence['mean_coherence']:.2f})")
+        else:
+            console.print(f"  [green]✓ All agents coherent[/green] (mean: {coherence['mean_coherence']:.2f})")
 
         save_swarm_forecast(question, result["probability"], result["consensus_score"], market_odds)
 

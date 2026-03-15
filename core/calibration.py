@@ -121,3 +121,56 @@ def get_calibration_weights() -> dict[str, float]:
     inverted = {k: 1.0 / (v + 0.01) for k, v in scores.items()}
     max_w = max(inverted.values())
     return {k: v / max_w for k, v in inverted.items()}
+
+
+def get_forecast_history(limit: int = 50) -> list[dict]:
+    """Retrieve past swarm forecasts."""
+    conn = sqlite3.connect(DB_PATH)
+    rows = conn.execute(
+        """SELECT question, final_probability, consensus_score,
+                  market_odds, outcome, brier_score, created_at, resolved_at
+           FROM swarm_forecasts ORDER BY created_at DESC LIMIT ?""",
+        (limit,)
+    ).fetchall()
+    conn.close()
+    return [
+        {
+            "question": r[0],
+            "probability": r[1],
+            "consensus_score": r[2],
+            "market_odds": r[3],
+            "outcome": r[4],
+            "brier_score": r[5],
+            "created_at": r[6],
+            "resolved_at": r[7],
+            "status": "resolved" if r[4] is not None else "pending",
+        }
+        for r in rows
+    ]
+
+
+def export_calibration(format: str = "json") -> str:
+    """Export calibration data as JSON or CSV."""
+    agent_scores = get_agent_brier_scores()
+    swarm_score = get_swarm_brier_score()
+    history = get_forecast_history(limit=1000)
+
+    if format == "csv":
+        import csv
+        import io
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["question", "probability", "consensus_score", "market_odds",
+                         "outcome", "brier_score", "created_at", "resolved_at", "status"])
+        for h in history:
+            writer.writerow([h["question"], h["probability"], h["consensus_score"],
+                             h["market_odds"], h["outcome"], h["brier_score"],
+                             h["created_at"], h["resolved_at"], h["status"]])
+        return output.getvalue()
+    else:
+        import json
+        return json.dumps({
+            "swarm_brier_score": swarm_score,
+            "agent_brier_scores": agent_scores,
+            "forecasts": history,
+        }, indent=2)

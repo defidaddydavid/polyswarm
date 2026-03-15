@@ -2,21 +2,24 @@
 FastAPI routes for PolySwarm.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Security, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 from typing import Optional
+import os
 from core.swarm import Swarm
 from core.calibration import (
     get_swarm_brier_score,
     get_agent_brier_scores,
     resolve_forecast,
+    get_forecast_history,
 )
 
 app = FastAPI(
     title="PolySwarm",
     description="Multi-agent AI forecasting engine for prediction markets",
-    version="0.2.0",
+    version="0.6.0",
 )
 
 app.add_middleware(
@@ -25,6 +28,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Optional API key authentication
+API_KEY = os.getenv("POLYSWARM_API_KEY")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+async def verify_api_key(api_key: str = Security(api_key_header)):
+    """If POLYSWARM_API_KEY is set, require it in X-API-Key header."""
+    if API_KEY and api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    return api_key
+
 
 swarm = Swarm()
 
@@ -46,9 +61,8 @@ class ResolveRequest(BaseModel):
 
 
 @app.post("/forecast")
-async def forecast(req: ForecastRequest):
+async def forecast(req: ForecastRequest, _=Depends(verify_api_key)):
     try:
-        import os
         if req.rounds:
             os.environ["DEBATE_ROUNDS"] = str(req.rounds)
         result = swarm.forecast(req.question, req.market_odds)
@@ -58,7 +72,7 @@ async def forecast(req: ForecastRequest):
 
 
 @app.post("/scenario")
-async def scenario(req: ScenarioRequest):
+async def scenario(req: ScenarioRequest, _=Depends(verify_api_key)):
     try:
         from core.scenario import ScenarioEngine
         engine = ScenarioEngine()
@@ -109,6 +123,16 @@ async def agents():
     return {"agents": PERSONA_DEFINITIONS, "count": len(PERSONA_DEFINITIONS)}
 
 
+@app.get("/forecasts")
+async def forecasts(limit: int = 50, _=Depends(verify_api_key)):
+    """Retrieve past forecast history from the calibration DB."""
+    try:
+        history = get_forecast_history(limit=limit)
+        return {"forecasts": history, "count": len(history)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.2.0", "agents": 12}
+    return {"status": "ok", "version": "0.6.0", "agents": 12}
