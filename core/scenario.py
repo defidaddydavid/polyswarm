@@ -1,7 +1,7 @@
 """
 Scenario simulation engine.
 Feed a scenario, get simulated crowd reactions, sentiment shift, and market impact.
-This is the MiroFish-style mode: not just "will X happen" but "if X happens, what follows?"
+Not just "will X happen" but "if X happens, what follows?"
 """
 
 from __future__ import annotations

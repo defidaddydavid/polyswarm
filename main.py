@@ -40,7 +40,7 @@ app = typer.Typer(
 def _banner():
     """Print the startup banner."""
     console.print()
-    console.print(f"  [bold #F59E0B]<<<>>>  P O L Y S W A R M[/]  [dim]v0.8.0[/dim]")
+    console.print(f"  [bold #F59E0B]<<<>>>  P O L Y S W A R M[/]  [dim]v1.0.0  |  26 methods[/dim]")
     console.print(f"  [{COLORS['dim']}]Multi-agent AI forecasting engine[/]")
     console.print(f"  [{COLORS['dim']}]{'─' * 42}[/]")
 

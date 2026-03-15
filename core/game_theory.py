@@ -151,3 +151,93 @@ def nash_equilibrium_check(estimates: list[AgentEstimate]) -> dict:
         "potential_deviators": deviators,
         "stability_score": round(1.0 - len(deviators) / len(estimates), 3),
     }
+
+
+# ---------------------------------------------------------------------------
+# Scoring Rule Analysis
+# ---------------------------------------------------------------------------
+
+def scoring_rule_analysis(
+    estimates: list[AgentEstimate],
+    rule: str = "brier",
+) -> dict:
+    """
+    For each agent, compute expected score under truthful reporting vs
+    strategic shading (reporting closer to 0.5 to minimize worst-case loss).
+
+    An agent is incentive-compatible if their truthful score is better
+    (lower for Brier, higher for log) than their shaded score across
+    both possible outcomes.
+
+    Args:
+        estimates: list of AgentEstimate objects.
+        rule: "brier" or "log".
+
+    Returns:
+        dict with agent_scores, n_strategic, strategic_agents, mean_truthfulness.
+    """
+    score_fn = _brier_score if rule == "brier" else _log_score
+    # For Brier, lower is better; for log, higher is better.
+    brier_mode = rule == "brier"
+
+    agent_scores = {}
+    strategic_agents = []
+
+    for e in estimates:
+        p_true = e.probability
+        p_shaded = _strategic_shade(p_true)
+
+        # Expected score = p_true * score(forecast, 1) + (1-p_true) * score(forecast, 0)
+        # assuming the agent's own probability is the true base rate
+        truthful_ev = p_true * score_fn(p_true, 1.0) + (1 - p_true) * score_fn(p_true, 0.0)
+        shaded_ev = p_true * score_fn(p_shaded, 1.0) + (1 - p_true) * score_fn(p_shaded, 0.0)
+
+        # Incentive compatible if truthful is at least as good as shaded
+        if brier_mode:
+            # lower Brier is better
+            incentive_compatible = truthful_ev <= shaded_ev + 1e-9
+        else:
+            # higher log score is better
+            incentive_compatible = truthful_ev >= shaded_ev - 1e-9
+
+        agent_scores[e.agent_id] = {
+            "truthful_score": round(truthful_ev, 4),
+            "shaded_score": round(shaded_ev, 4),
+            "incentive_compatible": incentive_compatible,
+        }
+
+        if not incentive_compatible:
+            strategic_agents.append(e.agent_id)
+
+    n_strategic = len(strategic_agents)
+    n_total = len(estimates)
+    mean_truthfulness = round(1.0 - n_strategic / n_total, 4) if n_total > 0 else 1.0
+
+    return {
+        "agent_scores": agent_scores,
+        "n_strategic": n_strategic,
+        "strategic_agents": strategic_agents,
+        "mean_truthfulness": mean_truthfulness,
+    }
+
+
+def _brier_score(forecast: float, outcome: float) -> float:
+    """Brier score: (forecast - outcome)^2. Lower is better."""
+    return (forecast - outcome) ** 2
+
+
+def _log_score(forecast: float, outcome: float) -> float:
+    """
+    Logarithmic score: outcome*log(f) + (1-outcome)*log(1-f).
+    Higher (less negative) is better.
+    """
+    f = max(1e-7, min(1 - 1e-7, forecast))
+    return outcome * math.log(f) + (1 - outcome) * math.log(1 - f)
+
+
+def _strategic_shade(probability: float, risk_aversion: float = 0.3) -> float:
+    """
+    Shade a probability toward 0.5 based on risk aversion.
+    risk_aversion=0 means no shading, risk_aversion=1 means report 0.5.
+    """
+    return probability + risk_aversion * (0.5 - probability)

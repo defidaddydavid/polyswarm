@@ -19,7 +19,7 @@ from core.calibration import (
 app = FastAPI(
     title="PolySwarm",
     description="Multi-agent AI forecasting engine for prediction markets",
-    version="0.8.0",
+    version="1.0.0",
 )
 
 app.add_middleware(
@@ -152,7 +152,8 @@ async def health():
     source_list = list_sources()
     return {
         "status": "ok",
-        "version": "0.8.0",
+        "version": "1.0.0",
+        "methods": 26,
         "agents": 12,
         "data_sources": sum(1 for s in source_list if s["available"]),
     }

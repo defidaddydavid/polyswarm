@@ -13,7 +13,7 @@
 <br />
 
 *12 AI agents with distinct personas debate in real-time, informed by 23 live data sources,*
-*to produce calibrated probability estimates via 10 aggregation methods and crowd simulations.*
+*to produce calibrated probability estimates via 26 mathematical methods and crowd simulations.*
 
 <br />
 
@@ -55,8 +55,9 @@ python main.py forecast \
 **Output:**
 - Probability estimate from 12 independent agents
 - Multi-round debate (agents update after seeing others)
-- 10 aggregation methods: Bayesian, extremized, surprisingly popular, LogOP, Cooke's, meta-probability, neutral pivot, MC, bootstrap CI, coherence check
-- Herding detection, Nash equilibrium, information cascades
+- 26 mathematical methods: Bayesian, extremized, Dempster-Shafer, copula dependency, MCMC posterior, Shapley attribution, conformal prediction, HMM regime detection, and more
+- Game theory: herding, Nash equilibrium, cascades, scoring rules
+- Information theory: mutual information, transfer entropy, redundancy
 - Edge calculation vs live market odds
 
 </td>
@@ -157,7 +158,7 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
     │  Round 2: Debate   │        │  Aggregate         │
     │  Update beliefs    │        │  sentiment vector  │
     │       ↓            │        │       ↓            │
-    │  7x Aggregation    │        │  Generate crowd    │
+    │  26x Analysis      │        │  Generate crowd    │
     │  + Game Theory     │        │  narrative +       │
     │       ↓            │        │  2nd-order effects │
     │  Final probability │        │                    │
@@ -178,31 +179,61 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
 
 ## Statistical Analysis
 
-Every forecast runs through a full statistical analysis pipeline — 10 aggregation methods plus game-theoretic analysis:
+Every forecast runs through a full analysis pipeline — **26 mathematical methods** across 6 categories:
 
-### Aggregation Methods
+### Classical Aggregation (10 methods)
 
-| Method | Module | What It Does |
-|--------|--------|-------------|
-| **Bayesian Updating** | `core/bayesian.py` | Treats each agent's estimate as evidence. Updates beliefs via Bayes' theorem with KL-divergence weighting. More surprising estimates carry more information. |
-| **Extremized Aggregation** | `core/extremize.py` | Based on IARPA ACE research (Satopää/Tetlock). Corrects systematic under-confidence by pushing averages away from 50% in log-odds space. |
-| **Surprisingly Popular** | `core/surprisingly_popular.py` | Prelec et al. (2017, *Nature*). Exploits meta-cognitive information — the correct answer is often "more popular than people predict." |
-| **Log Opinion Pool** | `core/opinion_pool.py` | Multiplicative combination in log space. Satisfies external Bayesianity — theoretically optimal when agents share likelihoods. |
-| **Cooke's Classical Model** | `core/opinion_pool.py` | Performance-based weighting from expert elicitation theory. Weights by calibration AND informativeness. Unqualified agents are pruned. |
-| **Meta-Probability Weighting** | `core/meta_probability.py` | Palley & Satopää (2023). Weights agents by information signal gap — agents whose estimates differ most from base rate carry more weight. |
-| **Neutral Pivoting** | `core/meta_probability.py` | Shared-information bias correction. Removes the common prior component to isolate each agent's private information signal. |
-| **Coherence Check** | `core/coherence.py` | Mandel (2024). Tests probability axiom consistency — bounds, complementarity, union bounds. Flags incoherent agents. |
-| **Monte Carlo Simulation** | `core/statistics.py` | 5,000 simulations treating each agent as a beta distribution. Produces percentiles, skew, and threshold probabilities. |
-| **Bootstrap CI** | `core/statistics.py` | Resamples agent estimates 1,000 times to produce 95% confidence intervals. Quantifies uncertainty in the consensus. |
+| Method | Module | Reference |
+|--------|--------|-----------|
+| **Bayesian Updating** | `core/bayesian.py` | Bayes' theorem with KL-divergence weighting |
+| **Extremized Aggregation** | `core/extremize.py` | Satopää/Tetlock IARPA ACE — corrects under-confidence |
+| **Surprisingly Popular** | `core/surprisingly_popular.py` | Prelec et al. (2017, *Nature*) — meta-cognitive exploitation |
+| **Log Opinion Pool** | `core/opinion_pool.py` | Genest & Zidek — multiplicative log-space combination |
+| **Cooke's Classical Model** | `core/opinion_pool.py` | Performance-based calibration × informativeness weighting |
+| **Meta-Probability Weighting** | `core/meta_probability.py` | Palley & Satopää (2023) — information signal gap |
+| **Neutral Pivoting** | `core/meta_probability.py` | Shared-information bias correction |
+| **Coherence Check** | `core/coherence.py` | Mandel (2024) — probability axiom consistency |
+| **Monte Carlo Simulation** | `core/statistics.py` | 5,000 beta-distributed simulations |
+| **Bootstrap CI** | `core/statistics.py` | 1,000 resamples → 95% confidence intervals |
 
-### Game Theory & Analysis
+### Advanced Mathematical Analysis (7 methods)
 
-| Method | Module | What It Does |
-|--------|--------|-------------|
-| **Herding Detection** | `core/game_theory.py` | HHI-based clustering analysis. Detects when agents converge suspiciously. Flags contrarian signals. |
-| **Information Cascades** | `core/game_theory.py` | Tracks belief shifts between debate rounds. Detects when agents flip sides and whether convergence was genuine. |
-| **Nash Equilibrium** | `core/game_theory.py` | Checks if consensus is stable — would any agent benefit from deviating? Unstable = low-confidence forecast. |
-| **Agent Agreement** | `core/bayesian.py` | Pairwise Jensen-Shannon divergence matrix. Identifies most aligned and most divergent agent pairs. |
+| Method | Module | Reference |
+|--------|--------|-----------|
+| **Dempster-Shafer Evidence Theory** | `core/dempster_shafer.py` | Belief functions — explicitly represents "we don't know" via belief/plausibility/uncertainty. Flags when to abstain. |
+| **Copula Dependency Modeling** | `core/copula.py` | Gaussian copula + Kish's effective sample size. Quantifies how many truly independent opinions you have. |
+| **MCMC Posterior Sampling** | `core/statistics.py` | Metropolis-Hastings with 95% HDI. Properly explores the joint posterior respecting correlations. |
+| **Kernel Density Estimation** | `core/statistics.py` | Gaussian KDE with Silverman bandwidth. Detects bimodal distributions (agents split into camps). |
+| **Conformal Prediction** | `core/conformal.py` | Distribution-free intervals with guaranteed coverage. Jackknife+ or split conformal. |
+| **Optimal Transport** | `core/optimal_transport.py` | Wasserstein distance between methods → robust consensus from largest agreement cluster. |
+| **Stacking Ensemble** | `core/aggregator.py` | Ridge regression meta-learner across all methods. Learns optimal weights from history. |
+
+### Game Theory (5 methods)
+
+| Method | Module | Reference |
+|--------|--------|-----------|
+| **Herding Detection** | `core/game_theory.py` | HHI-adapted clustering analysis + contrarian identification |
+| **Information Cascades** | `core/game_theory.py` | Cross-round belief shift tracking, flip detection |
+| **Nash Equilibrium** | `core/game_theory.py` | Stability check — would any agent benefit from deviating? |
+| **Scoring Rule Analysis** | `core/game_theory.py` | Brier/log scoring incentive compatibility — detects strategic shading |
+| **Agent Agreement Matrix** | `core/bayesian.py` | Pairwise Jensen-Shannon divergence |
+
+### Information Theory (1 module, 5 metrics)
+
+| Method | Module | Reference |
+|--------|--------|-----------|
+| **Mutual Information** | `core/information_theory.py` | Shannon — pairwise agent information overlap |
+| **Transfer Entropy** | `core/information_theory.py` | Schreiber (2000) — causal information flow between rounds |
+| **Redundancy Ratio** | `core/information_theory.py` | Shared vs unique information quantification |
+| **Diversity Index** | `core/information_theory.py` | Agent independence measurement |
+
+### Attribution & Meta-Analysis (3 methods)
+
+| Method | Module | Reference |
+|--------|--------|-----------|
+| **Shapley Values** | `core/shapley.py` | Cooperative game theory — fair contribution attribution per agent |
+| **HMM Regime Detection** | `core/regime.py` | Hidden Markov Model — consensus/debate/chaos state classification |
+| **Calibration Curves** | `core/calibration_curve.py` | Isotonic regression (PAVA) + Platt scaling for historical recalibration |
 
 <br />
 
@@ -384,7 +415,10 @@ python main.py calibration
 - [x] Modular plugin-based data pipeline
 - [x] API key authentication
 - [x] Forecast history & calibration export
-- [x] 10 peer-reviewed aggregation methods
+- [x] 26 mathematical analysis methods (10 aggregation + 7 advanced + 5 game theory + 4 info theory + 3 meta)
+- [x] Dempster-Shafer evidence theory + copula dependency modeling
+- [x] MCMC posterior sampling + conformal prediction intervals
+- [x] Shapley value attribution + HMM regime detection
 - [ ] Live Polymarket sync + auto-compare leaderboard
 - [ ] Web UI with real-time debate viewer
 - [ ] Agent memory persistence (Redis)
