@@ -9,14 +9,16 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 import json
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich import box
 
+from core.theme import (
+    console, section, stat_row,
+    progress_bar, sentiment_bar, probability_color, edge_color,
+    COLORS,
+)
 from core.agent import _get_llm_client, _call_llm, _parse_json
-
-console = Console()
 
 
 @dataclass
@@ -51,12 +53,27 @@ class ScenarioEngine:
 
         from agents.personas import PERSONA_DEFINITIONS
 
-        console.print(Panel(f"[bold magenta]Scenario:[/bold magenta] {scenario}", title="PolySwarm Scenario Simulation"))
+        # Header
+        console.print()
+        console.print(Panel(
+            f"  [bold white]{scenario}[/]",
+            border_style=COLORS["accent2"],
+            title=f"[bold {COLORS['accent2']}]<<<>>>  SCENARIO[/]",
+            title_align="left",
+            subtitle=f"[{COLORS['dim']}]{len(PERSONA_DEFINITIONS)} agents reacting[/]",
+            subtitle_align="right",
+            padding=(1, 2),
+        ))
+
+        console.print()
+        console.print(f"  [bold {COLORS['accent2']}]{'━' * 3} REACTIONS {'━' * 42}[/]")
+        console.print()
 
         reactions = []
 
         for persona_def in PERSONA_DEFINITIONS:
-            console.print(f"  [dim]{persona_def['persona']}[/dim] reacting...", end=" ")
+            persona_short = persona_def["persona"][:22].ljust(22)
+            console.print(f"  [{COLORS['dim']}]{persona_short}[/]", end="")
 
             system = f"""You are a {persona_def['persona']} reacting to a breaking news scenario in real-time.
 
@@ -64,7 +81,7 @@ Your profile: {persona_def['description']}
 Your focus: {persona_def['information_focus']}
 Your biases: {persona_def['bias_profile']}
 
-Simulate your IMMEDIATE, AUTHENTIC reaction to the scenario — not a detached analysis, but how you personally would react and what you would actually DO.
+Simulate your IMMEDIATE, AUTHENTIC reaction to the scenario -- not a detached analysis, but how you personally would react and what you would actually DO.
 
 Output ONLY valid JSON with these fields:
 - immediate_reaction: string (what you think/say in the first 5 minutes)
@@ -95,10 +112,16 @@ React now."""
                     actions=data.get("actions", []),
                 )
                 reactions.append(reaction)
-                sentiment_emoji = "🟢" if reaction.sentiment_shift > 0.2 else "🔴" if reaction.sentiment_shift < -0.2 else "🟡"
-                console.print(f"{sentiment_emoji} sentiment={reaction.sentiment_shift:+.2f} impact={reaction.price_impact_estimate:+.1%}")
+
+                # Inline result
+                s = reaction.sentiment_shift
+                s_color = COLORS["positive"] if s > 0.2 else COLORS["negative"] if s < -0.2 else COLORS["warning"]
+                mini_bar = sentiment_bar(s, width=10)
+                impact = reaction.price_impact_estimate
+                i_color = COLORS["positive"] if impact > 0 else COLORS["negative"]
+                console.print(f" [{s_color}]{s:+.2f}[/]  {mini_bar}  [{i_color}]{impact:+.1%}[/]")
             except Exception as e:
-                console.print(f"[red]error: {e}[/red]")
+                console.print(f" [{COLORS['negative']}]error[/]")
 
         # aggregate
         if reactions:
@@ -140,7 +163,7 @@ React now."""
 
         system = "You are a market analyst synthesizing crowd reactions into a narrative."
         user = f"""Given this scenario and these market participant reactions, write:
-1. A 2-sentence "crowd narrative" — the dominant story that emerges from these reactions combined
+1. A 2-sentence "crowd narrative" -- the dominant story that emerges from these reactions combined
 2. 3-4 second-order effects (what happens NEXT, after the initial reaction)
 
 Scenario: {scenario}
@@ -162,30 +185,63 @@ Output JSON with:
             return "Mixed reactions across market participants.", []
 
     def _print_results(self, result: ScenarioResult):
-        table = Table(title="Scenario Reactions", box=box.ROUNDED, show_lines=True)
-        table.add_column("Persona", style="cyan", min_width=20)
-        table.add_column("Sentiment", justify="center")
-        table.add_column("Price Impact", justify="right", style="green")
-        table.add_column("Immediate Actions")
+        # ── Reaction Detail Table ──
+        console.print()
+        table = Table(
+            box=box.SIMPLE_HEAVY,
+            border_style=COLORS["accent2"],
+            show_header=True,
+            header_style=f"bold {COLORS['accent2']}",
+            padding=(0, 1),
+            title=f"[bold {COLORS['accent2']}]Detailed Reactions[/]",
+        )
+        table.add_column("#", style=COLORS["dim"], justify="right", width=3)
+        table.add_column("Persona", style="bold", min_width=22)
+        table.add_column("Sentiment", justify="center", width=20)
+        table.add_column("Impact", justify="right", width=8)
+        table.add_column("Actions", style=COLORS["dim"], max_width=35)
 
-        for r in result.reactions:
-            bar = "█" * int(abs(r.sentiment_shift) * 10)
-            sentiment_str = f"[green]+{r.sentiment_shift:.2f} {bar}[/green]" if r.sentiment_shift > 0 else f"[red]{r.sentiment_shift:.2f} {bar}[/red]"
+        for i, r in enumerate(result.reactions, 1):
+            s = r.sentiment_shift
+            s_color = COLORS["positive"] if s > 0.2 else COLORS["negative"] if s < -0.2 else COLORS["warning"]
+            bar = sentiment_bar(s, width=12)
+            impact_color = COLORS["positive"] if r.price_impact_estimate > 0 else COLORS["negative"]
+
             table.add_row(
+                str(i),
                 r.persona,
-                sentiment_str,
-                f"{r.price_impact_estimate:+.1%}",
-                " · ".join(r.actions[:2]),
+                f"[{s_color}]{s:+.2f}[/] {bar}",
+                f"[{impact_color}]{r.price_impact_estimate:+.1%}[/]",
+                " | ".join(r.actions[:2]),
             )
         console.print(table)
 
+        # ── Final Panel ──
         direction = "BULLISH" if result.aggregate_sentiment > 0.1 else "BEARISH" if result.aggregate_sentiment < -0.1 else "NEUTRAL"
-        color = "green" if result.aggregate_sentiment > 0.1 else "red" if result.aggregate_sentiment < -0.1 else "yellow"
+        d_color = COLORS["positive"] if result.aggregate_sentiment > 0.1 else COLORS["negative"] if result.aggregate_sentiment < -0.1 else COLORS["warning"]
+        impact_color = COLORS["positive"] if result.aggregate_price_impact > 0 else COLORS["negative"]
 
+        big_bar = sentiment_bar(result.aggregate_sentiment, width=24)
+
+        lines = []
+        lines.append(f"  [bold {d_color}]{direction}[/]  {big_bar}")
+        lines.append("")
+        lines.append(f"  [{COLORS['dim']}]Sentiment[/]    [{d_color}]{result.aggregate_sentiment:+.3f}[/]     [{COLORS['dim']}]Impact[/]    [{impact_color}]{result.aggregate_price_impact:+.1%}[/]     [{COLORS['dim']}]Consensus[/]  [bold]{result.consensus:.0%}[/]")
+        lines.append("")
+        lines.append(f"  [{COLORS['dim']}]Narrative[/]")
+        lines.append(f"  [italic]{result.narrative}[/italic]")
+
+        if result.secondary_effects:
+            lines.append("")
+            lines.append(f"  [{COLORS['dim']}]Second-Order Effects[/]")
+            for effect in result.secondary_effects:
+                lines.append(f"  [{COLORS['dim']}]-->[/] {effect}")
+
+        console.print()
         console.print(Panel(
-            f"[bold {color}]{direction}[/bold {color}]  Sentiment: {result.aggregate_sentiment:+.2f}  |  Price Impact: {result.aggregate_price_impact:+.1%}  |  Consensus: {result.consensus:.0%}\n\n"
-            f"[italic]{result.narrative}[/italic]\n\n"
-            + "\n".join(f"  -> {e}" for e in result.secondary_effects),
-            title="Crowd Simulation Result",
-            border_style=color,
+            "\n".join(lines),
+            border_style=d_color,
+            title=f"[bold {d_color}]<<<>>>  SIMULATION RESULT[/]",
+            title_align="left",
+            padding=(1, 2),
         ))

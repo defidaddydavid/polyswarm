@@ -1,15 +1,20 @@
 """
-Swarm orchestrator — runs debate rounds, applies Bayesian updating,
+Swarm orchestrator -- runs debate rounds, applies Bayesian updating,
 game theory analysis, and statistical modeling.
 """
 
 from __future__ import annotations
 import os
-from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from rich.columns import Columns
 from rich import box
 
+from core.theme import (
+    console, header, section, stat_row, stat_card,
+    progress_bar, probability_color, edge_color, sentiment_bar,
+    COLORS, LOGO_SMALL,
+)
 from core.agent import Agent, AgentEstimate
 from core.aggregator import aggregate
 from core.bayesian import bayesian_aggregate, compute_agent_agreement_matrix
@@ -29,8 +34,6 @@ from core.calibration import (
 from agents.personas import build_swarm
 from data.context import build_context
 
-console = Console()
-
 
 class Swarm:
     def __init__(self, agents: list[Agent] | None = None):
@@ -39,22 +42,41 @@ class Swarm:
         self.debate_rounds = int(os.getenv("DEBATE_ROUNDS", "2"))
 
     def forecast(self, question: str, market_odds: float | None = None) -> dict:
-        console.print(Panel(f"[bold cyan]Question:[/bold cyan] {question}", title="⟐ PolySwarm Forecast", border_style="cyan"))
+        # ── Question Header ──
+        console.print()
+        console.print(Panel(
+            f"  [bold white]{question}[/]",
+            border_style=COLORS["brand"],
+            title=f"[bold {COLORS['brand']}]<<<>>>  FORECAST[/]",
+            title_align="left",
+            subtitle=f"[{COLORS['dim']}]{self.debate_rounds} rounds  |  {len(self.agents)} agents[/]",
+            subtitle_align="right",
+            padding=(1, 2),
+        ))
 
-        console.print("[dim]Fetching context from 15+ live sources...[/dim]")
+        # ── Data Fetch ──
+        console.print()
+        console.print(f"  [{COLORS['dim']}]Fetching live data from 23 sources...[/]")
         context = build_context(question)
+        console.print(f"  [{COLORS['positive']}]Context ready[/]")
 
         calibration_weights = get_calibration_weights()
 
         round1_estimates: list[AgentEstimate] = []
         all_estimates: list[AgentEstimate] = []
 
+        # ── Debate Rounds ──
         for round_num in range(1, self.debate_rounds + 1):
-            console.print(f"\n[bold yellow]── Round {round_num} ──[/bold yellow]")
+            section_title = f"ROUND {round_num}"
+            console.print()
+            console.print(f"  [bold {COLORS['brand']}]{'━' * 3} {section_title} {'━' * (50 - len(section_title))}[/]")
+            console.print()
+
             round_estimates = []
 
             for agent in self.agents:
-                console.print(f"  [dim]{agent.persona}[/dim] thinking...", end=" ")
+                persona_short = agent.persona[:22].ljust(22)
+                console.print(f"  [{COLORS['dim']}]{persona_short}[/]", end="")
                 est = agent.estimate(
                     question=question,
                     context=context,
@@ -62,7 +84,12 @@ class Swarm:
                     other_estimates=all_estimates if round_num > 1 else None,
                 )
                 round_estimates.append(est)
-                console.print(f"[green]{est.probability:.0%}[/green] (confidence: {est.confidence:.0%})")
+
+                # Mini inline visualization
+                p = est.probability
+                p_color = probability_color(p)
+                conf_bar = progress_bar(est.confidence, width=8, filled_color=COLORS["dim"])
+                console.print(f" [bold {p_color}]{p:5.1%}[/]  {conf_bar}  [{COLORS['dim']}]conf {est.confidence:.0%}[/]")
 
             if round_num == 1:
                 round1_estimates = round_estimates.copy()
@@ -73,7 +100,9 @@ class Swarm:
             save_forecast(question, est.agent_id, est.probability)
 
         # ── ANALYSIS PIPELINE ──
-        console.print(f"\n[bold magenta]── Analysis ──[/bold magenta]")
+        console.print()
+        console.print(f"  [bold {COLORS['accent2']}]{'━' * 3} ANALYSIS {'━' * 44}[/]")
+        console.print()
 
         # 1. Standard weighted aggregation
         result = aggregate(all_estimates, calibration_weights)
@@ -81,7 +110,6 @@ class Swarm:
         # 2. Bayesian aggregation
         bayesian = bayesian_aggregate(all_estimates, prior=market_odds or 0.5)
         result["bayesian"] = bayesian
-        console.print(f"  [dim]Bayesian posterior:[/dim] [bold]{bayesian['bayesian_probability']:.1%}[/bold] (info gain: {bayesian['information_gain']:.3f} bits)")
 
         # 3. Agent agreement matrix
         agreement = compute_agent_agreement_matrix(all_estimates)
@@ -90,83 +118,59 @@ class Swarm:
         # 4. Herding detection
         herding = detect_herding(all_estimates)
         result["herding"] = herding
-        if herding["herding_detected"]:
-            console.print(f"  [yellow]⚠ Herding detected[/yellow] (score: {herding['herding_score']:.2f}, direction: {herding['herd_direction']})")
-            if herding["contrarians"]:
-                console.print(f"    Contrarians: {', '.join(herding['contrarians'])}")
-        else:
-            console.print(f"  [green]✓ No herding[/green] (score: {herding['herding_score']:.2f})")
 
-        # 5. Information cascade (if multi-round)
+        # 5. Information cascade
         if self.debate_rounds > 1 and round1_estimates:
             cascade = compute_information_cascade(round1_estimates, all_estimates)
             result["cascade"] = cascade
-            if cascade.get("cascade_detected"):
-                console.print(f"  [yellow]⚠ Information cascade detected[/yellow] (convergence: {cascade['convergence_rate']:.0%})")
-            if cascade.get("flipped_agents"):
-                console.print(f"    Flipped agents: {', '.join(cascade['flipped_agents'])}")
 
         # 6. Nash equilibrium
         nash = nash_equilibrium_check(all_estimates)
         result["nash_equilibrium"] = nash
-        if nash["stable"]:
-            console.print(f"  [green]✓ Nash stable[/green] — no agent has incentive to deviate")
-        else:
-            deviators = [d["agent"] for d in nash["potential_deviators"]]
-            console.print(f"  [yellow]⚠ Unstable[/yellow] — potential deviators: {', '.join(deviators)}")
 
         # 7. Bootstrap confidence interval
         bootstrap = bootstrap_confidence_interval(all_estimates)
         result["confidence_interval"] = bootstrap
-        console.print(f"  [dim]95% CI:[/dim] [{bootstrap['ci_lower']:.1%}, {bootstrap['ci_upper']:.1%}] (width: {bootstrap['ci_width']:.1%})")
 
         # 8. Monte Carlo
         mc = monte_carlo_scenarios(all_estimates)
         result["monte_carlo"] = mc
-        console.print(f"  [dim]Monte Carlo (5K sims):[/dim] median={mc['percentiles']['p50']:.1%}, P(>50%)={mc['thresholds']['P(>50%)']:.0%}")
 
-        # 9. Extremized aggregation (Satopää/Baron/Tetlock IARPA)
+        # 9. Extremized aggregation
         ext = extremize(all_estimates)
         result["extremized"] = ext
-        console.print(f"  [dim]Extremized (d={ext['extremizing_factor']:.2f}):[/dim] [bold]{ext['extremized_probability']:.1%}[/bold] (shift: {ext['shift']:+.1%})")
 
-        # 10. Surprisingly Popular algorithm (Prelec 2017)
+        # 10. Surprisingly Popular
         sp = surprisingly_popular(all_estimates)
         result["surprisingly_popular"] = sp
-        console.print(f"  [dim]Surprisingly Popular:[/dim] [bold]{sp['sp_adjusted_probability']:.1%}[/bold] (SP score: {sp['sp_score']:+.3f}, direction: {sp['surprise_direction']})")
 
-        # 11. Logarithmic opinion pool
+        # 11. Log Opinion Pool
         logop = logarithmic_opinion_pool(all_estimates)
         result["log_opinion_pool"] = logop
-        console.print(f"  [dim]Log Opinion Pool:[/dim] [bold]{logop['logop_probability']:.1%}[/bold] (vs linear: {logop['linear_probability']:.1%})")
 
-        # 12. Cooke's Classical Model (performance-based weighting)
+        # 12. Cooke's Classical Model
         cooke = cooke_classical_weights(all_estimates, calibration_weights)
         result["cooke_classical"] = cooke
-        console.print(f"  [dim]Cooke's Classical:[/dim] [bold]{cooke['cooke_probability']:.1%}[/bold] ({cooke['n_qualified']}/{len(all_estimates)} agents qualified)")
 
-        # 13. Meta-Probability Weighting (Palley & Satopää 2023)
+        # 13. Meta-Probability Weighting
         mpw = meta_probability_weight(all_estimates)
         result["meta_probability"] = mpw
-        console.print(f"  [dim]Meta-Prob Weight:[/dim] [bold]{mpw['mpw_probability']:.1%}[/bold] (top signal: {mpw['top_signal_agents'][0]['agent']})")
 
-        # 14. Neutral Pivoting (shared-information correction)
+        # 14. Neutral Pivoting
         pivot = neutral_pivot(all_estimates)
         result["neutral_pivot"] = pivot
-        console.print(f"  [dim]Neutral Pivot:[/dim] [bold]{pivot['pivoted_probability']:.1%}[/bold] (shift: {pivot['pivot_shift']:+.3f})")
 
         # 15. Coherence check
         coherence = coherence_check(all_estimates)
         result["coherence"] = coherence
-        if coherence["n_incoherent"] > 0:
-            console.print(f"  [yellow]⚠ {coherence['n_incoherent']} incoherent agents[/yellow] (mean coherence: {coherence['mean_coherence']:.2f})")
-        else:
-            console.print(f"  [green]✓ All agents coherent[/green] (mean: {coherence['mean_coherence']:.2f})")
 
         save_swarm_forecast(question, result["probability"], result["consensus_score"], market_odds)
 
-        # print results
-        self._print_results(result, market_odds, bayesian, bootstrap, mc)
+        # ── Print Everything ──
+        self._print_agent_table(result)
+        self._print_methods(result, bayesian, bootstrap, mc, ext, sp, logop, cooke, mpw, pivot)
+        self._print_diagnostics(herding, nash, coherence, result.get("cascade"))
+        self._print_final(result, market_odds, bayesian, bootstrap)
 
         if market_odds is not None:
             edge = result["probability"] - market_odds
@@ -179,57 +183,156 @@ class Swarm:
 
         return result
 
-    def _print_results(self, result: dict, market_odds, bayesian, bootstrap, mc):
-        # agent table
-        table = Table(title="Agent Estimates", box=box.ROUNDED, show_lines=True)
-        table.add_column("Agent", style="cyan")
-        table.add_column("P", justify="right", style="green")
-        table.add_column("Conf", justify="right")
-        table.add_column("Key Factors")
+    def _print_agent_table(self, result: dict):
+        """Print the agent estimates table."""
+        console.print()
+        table = Table(
+            box=box.SIMPLE_HEAVY,
+            border_style=COLORS["brand"],
+            show_header=True,
+            header_style=f"bold {COLORS['brand']}",
+            padding=(0, 1),
+            title=f"[bold {COLORS['brand']}]Agent Estimates[/]",
+        )
+        table.add_column("#", style=COLORS["dim"], justify="right", width=3)
+        table.add_column("Agent", style="bold", min_width=22)
+        table.add_column("Prob", justify="right", width=6)
+        table.add_column("", width=14)  # bar
+        table.add_column("Conf", justify="right", width=5)
+        table.add_column("Key Factors", style=COLORS["dim"], max_width=40)
 
-        for est in result["individual_estimates"]:
+        for i, est in enumerate(result["individual_estimates"], 1):
+            p = est["probability"]
+            p_color = probability_color(p)
+            bar = progress_bar(p, width=12, filled_color=p_color)
             table.add_row(
+                str(i),
                 est["persona"],
-                f"{est['probability']:.0%}",
+                f"[{p_color}]{p:.0%}[/]",
+                bar,
                 f"{est['confidence']:.0%}",
                 " | ".join(est["key_factors"][:2]),
             )
         console.print(table)
 
-        # summary panel
-        odds_line = ""
-        if market_odds is not None:
-            edge = result['probability'] - market_odds
-            b_edge = bayesian['bayesian_probability'] - market_odds
-            odds_line = (
-                f"\n  Market: [yellow]{market_odds:.0%}[/yellow]  "
-                f"Edge (weighted): [bold]{'+'if edge>0 else ''}{edge:.1%}[/bold]  "
-                f"Edge (Bayesian): [bold]{'+'if b_edge>0 else ''}{b_edge:.1%}[/bold]"
+    def _print_methods(self, result, bayesian, bootstrap, mc, ext, sp, logop, cooke, mpw, pivot):
+        """Print aggregation methods results."""
+        console.print()
+        console.print(f"  [bold {COLORS['accent2']}]{'━' * 3} AGGREGATION METHODS {'━' * 33}[/]")
+        console.print()
+
+        # Build a nice two-column layout
+        methods = [
+            ("Weighted Mean",      result["probability"],       f"consensus {result['consensus_score']:.0%}"),
+            ("Bayesian",           bayesian["bayesian_probability"], f"info gain {bayesian['information_gain']:.3f} bits"),
+            ("Extremized",         ext["extremized_probability"],   f"d={ext['extremizing_factor']:.2f}, shift {ext['shift']:+.1%}"),
+            ("Surprisingly Pop.",  sp["sp_adjusted_probability"],   f"SP score {sp['sp_score']:+.3f}"),
+            ("Log Opinion Pool",   logop["logop_probability"],     f"vs linear {logop['linear_probability']:.1%}"),
+            ("Cooke's Classical",  cooke["cooke_probability"],     f"{cooke['n_qualified']}/{len(result['individual_estimates'])} qualified"),
+            ("Meta-Prob Weight",   mpw["mpw_probability"],         f"top: {mpw['top_signal_agents'][0]['agent'][:16]}"),
+            ("Neutral Pivot",      pivot["pivoted_probability"],   f"shift {pivot['pivot_shift']:+.3f}"),
+            ("Monte Carlo",        mc["percentiles"]["p50"],       f"P(>50%)={mc['thresholds']['P(>50%)']:.0%}"),
+            ("Bootstrap CI",       (bootstrap["ci_lower"] + bootstrap["ci_upper"]) / 2,
+                                                                   f"[{bootstrap['ci_lower']:.1%}, {bootstrap['ci_upper']:.1%}]"),
+        ]
+
+        table = Table(
+            box=box.SIMPLE,
+            show_header=False,
+            padding=(0, 1),
+            show_edge=False,
+        )
+        table.add_column("Method", style="bold", min_width=20)
+        table.add_column("Prob", justify="right", width=6)
+        table.add_column("", width=16)  # bar
+        table.add_column("Detail", style=COLORS["dim"])
+
+        for name, prob, detail in methods:
+            p_color = probability_color(prob)
+            bar = progress_bar(prob, width=14, filled_color=p_color)
+            table.add_row(
+                f"  {name}",
+                f"[bold {p_color}]{prob:.1%}[/]",
+                bar,
+                detail,
             )
 
-        # get new analysis results if available
-        ext_line = ""
-        if "extremized" in result:
-            ext = result["extremized"]
-            ext_line = f"\n  Extremized: {ext['extremized_probability']:.1%} (d={ext['extremizing_factor']:.2f})"
-        sp_line = ""
-        if "surprisingly_popular" in result:
-            sp = result["surprisingly_popular"]
-            sp_line = f"  |  SP: {sp['sp_adjusted_probability']:.1%}"
-        logop_line = ""
-        if "log_opinion_pool" in result:
-            logop = result["log_opinion_pool"]
-            logop_line = f"  |  LogOP: {logop['logop_probability']:.1%}"
+        console.print(table)
 
+    def _print_diagnostics(self, herding, nash, coherence, cascade):
+        """Print diagnostic checks."""
+        console.print()
+        console.print(f"  [bold {COLORS['accent']}]{'━' * 3} DIAGNOSTICS {'━' * 40}[/]")
+        console.print()
+
+        # Herding
+        if herding["herding_detected"]:
+            h_icon = f"[{COLORS['warning']}]![/]"
+            h_text = f"[{COLORS['warning']}]Herding detected[/]  score={herding['herding_score']:.2f}  direction={herding['herd_direction']}"
+            if herding["contrarians"]:
+                h_text += f"\n                         [{COLORS['dim']}]Contrarians: {', '.join(herding['contrarians'])}[/]"
+        else:
+            h_icon = f"[{COLORS['positive']}]OK[/]"
+            h_text = f"[{COLORS['dim']}]No herding[/]  [{COLORS['dim']}]score={herding['herding_score']:.2f}[/]"
+        console.print(f"  {h_icon}  Herding     {h_text}")
+
+        # Nash
+        if nash["stable"]:
+            console.print(f"  [{COLORS['positive']}]OK[/]  Nash        [{COLORS['dim']}]Equilibrium stable -- no agent has incentive to deviate[/]")
+        else:
+            deviators = [d["agent"] for d in nash["potential_deviators"]]
+            console.print(f"  [{COLORS['warning']}]![/]   Nash        [{COLORS['warning']}]Unstable[/]  [{COLORS['dim']}]potential deviators: {', '.join(deviators)}[/]")
+
+        # Coherence
+        if coherence["n_incoherent"] > 0:
+            console.print(f"  [{COLORS['warning']}]![/]   Coherence   [{COLORS['warning']}]{coherence['n_incoherent']} incoherent[/]  [{COLORS['dim']}]mean={coherence['mean_coherence']:.2f}[/]")
+        else:
+            console.print(f"  [{COLORS['positive']}]OK[/]  Coherence   [{COLORS['dim']}]All coherent  mean={coherence['mean_coherence']:.2f}[/]")
+
+        # Cascade
+        if cascade:
+            if cascade.get("cascade_detected"):
+                console.print(f"  [{COLORS['warning']}]![/]   Cascade     [{COLORS['warning']}]Information cascade[/]  [{COLORS['dim']}]convergence={cascade['convergence_rate']:.0%}[/]")
+                if cascade.get("flipped_agents"):
+                    console.print(f"                         [{COLORS['dim']}]Flipped: {', '.join(cascade['flipped_agents'])}[/]")
+            else:
+                console.print(f"  [{COLORS['positive']}]OK[/]  Cascade     [{COLORS['dim']}]No cascade detected  convergence={cascade.get('convergence_rate', 0):.0%}[/]")
+
+    def _print_final(self, result, market_odds, bayesian, bootstrap):
+        """Print the final result panel."""
+        prob = result["probability"]
+        p_color = probability_color(prob)
+        b_prob = bayesian["bayesian_probability"]
+        b_color = probability_color(b_prob)
+
+        # Build the big final display
+        big_bar = progress_bar(prob, width=30, filled_color=p_color)
+
+        lines = []
+        lines.append(f"  [bold {p_color}]{prob:.1%}[/]  {big_bar}")
+        lines.append("")
+        lines.append(f"  [{COLORS['dim']}]Weighted[/]    [bold {p_color}]{prob:.1%}[/]     [{COLORS['dim']}]Bayesian[/]   [bold {b_color}]{b_prob:.1%}[/]     [{COLORS['dim']}]Consensus[/]  [bold]{result['consensus_score']:.0%}[/]")
+        lines.append(f"  [{COLORS['dim']}]95% CI[/]     [{COLORS['dim']}][{bootstrap['ci_lower']:.1%}, {bootstrap['ci_upper']:.1%}][/]   [{COLORS['dim']}]Entropy[/]    [{COLORS['dim']}]{bayesian['entropy']:.3f} bits[/]")
+
+        if market_odds is not None:
+            edge = prob - market_odds
+            b_edge = b_prob - market_odds
+            e_color = edge_color(edge)
+            be_color = edge_color(b_edge)
+            lines.append("")
+            lines.append(f"  [{COLORS['dim']}]Market[/]     [bold]{market_odds:.0%}[/]")
+            lines.append(f"  [{COLORS['dim']}]Edge[/]       [bold {e_color}]{edge:+.1%}[/]       [{COLORS['dim']}]Bayesian Edge[/]  [bold {be_color}]{b_edge:+.1%}[/]")
+
+            if abs(edge) >= 0.05:
+                direction = "LONG" if edge > 0 else "SHORT"
+                dir_color = COLORS["positive"] if edge > 0 else COLORS["negative"]
+                lines.append(f"  [{COLORS['dim']}]Signal[/]     [bold {dir_color}]{direction}[/] [{COLORS['dim']}]-- swarm sees {abs(edge):.0%} edge vs market[/]")
+
+        console.print()
         console.print(Panel(
-            f"  [bold green]Weighted:  {result['probability_pct']}[/bold green]  |  "
-            f"[bold cyan]Bayesian:  {bayesian['bayesian_probability']:.1%}[/bold cyan]  |  "
-            f"Consensus: {result['consensus_score']:.0%}\n"
-            f"  95% CI: [{bootstrap['ci_lower']:.1%}, {bootstrap['ci_upper']:.1%}]  |  "
-            f"MC median: {mc['percentiles']['p50']:.1%}  |  "
-            f"Entropy: {bayesian['entropy']:.3f} bits"
-            f"{ext_line}{sp_line}{logop_line}"
-            f"{odds_line}",
-            title="⟐ Final Result",
-            border_style="green",
+            "\n".join(lines),
+            border_style=COLORS["brand"],
+            title=f"[bold {COLORS['brand']}]<<<>>>  RESULT[/]",
+            title_align="left",
+            padding=(1, 2),
         ))
