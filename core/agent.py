@@ -26,11 +26,26 @@ def _get_llm_client():
     provider = os.getenv("LLM_PROVIDER", "anthropic").lower()
 
     if provider == "anthropic":
+        key = os.getenv("ANTHROPIC_API_KEY")
+        if not key:
+            raise ValueError(
+                "ANTHROPIC_API_KEY not set. Add it to .env or run:\n"
+                "  export ANTHROPIC_API_KEY=your_key_here\n"
+                "Or switch providers: LLM_PROVIDER=ollama (free, local)"
+            )
         import anthropic
-        return "anthropic", anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        return "anthropic", anthropic.Anthropic(api_key=key)
     elif provider == "openai":
+        key = os.getenv("OPENAI_API_KEY")
+        if not key:
+            raise ValueError(
+                "OPENAI_API_KEY not set. Add it to .env or run:\n"
+                "  export OPENAI_API_KEY=your_key_here\n"
+                "Or switch providers: LLM_PROVIDER=ollama (free, local)"
+            )
         import openai
-        return "openai", openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        base_url = os.getenv("OPENAI_BASE_URL")
+        return "openai", openai.OpenAI(api_key=key, **({"base_url": base_url} if base_url else {}))
     elif provider == "ollama":
         import httpx
         base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

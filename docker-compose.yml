@@ -1,23 +1,30 @@
-version: "3.9"
-
 services:
   polyswarm:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
       - DEBATE_ROUNDS=${DEBATE_ROUNDS:-2}
-      - SWARM_SIZE=${SWARM_SIZE:-8}
-      - MODEL_FAST=${MODEL_FAST:-claude-3-5-haiku-20241022}
-      - MODEL_DEEP=${MODEL_DEEP:-claude-3-5-sonnet-20241022}
+      - SWARM_SIZE=${SWARM_SIZE:-12}
       - DATABASE_URL=sqlite+aiosqlite:///./data/polyswarm.db
+      - REDIS_URL=redis://redis:6379
     volumes:
-      - ./data:/app/data
+      - polyswarm-data:/app/data
+    depends_on:
+      - redis
     restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
     restart: unless-stopped
+
+volumes:
+  polyswarm-data:
+  redis-data:

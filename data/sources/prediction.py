@@ -1,6 +1,7 @@
 """Prediction market data sources — Polymarket, Manifold."""
 
 from data.registry import DataSource, register_source
+import json
 import httpx
 
 
@@ -24,7 +25,7 @@ class PolymarketTrending(DataSource):
             question = m.get("question", "")[:70]
             outcome_prices = m.get("outcomePrices", "")
             try:
-                prices = eval(outcome_prices) if isinstance(outcome_prices, str) else outcome_prices
+                prices = json.loads(outcome_prices) if isinstance(outcome_prices, str) else outcome_prices
                 yes_price = float(prices[0]) if prices else 0
                 lines.append(f"  [{yes_price:.0%}] {question}")
             except Exception:
@@ -46,7 +47,7 @@ class PolymarketTrending(DataSource):
             for m in markets[:3]:
                 q = m.get("question", "")[:70]
                 try:
-                    prices = eval(m.get("outcomePrices", "[]"))
+                    prices = json.loads(m.get("outcomePrices", "[]"))
                     yes = float(prices[0]) if prices else 0
                     lines.append(f"  [{yes:.0%}] {q}")
                 except Exception:
