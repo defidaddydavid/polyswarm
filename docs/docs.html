@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolySwarm — Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">🐝 PolySwarm</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#installation">Install</a>
+                <a href="#configuration">Config</a>
+                <a href="#cli">CLI</a>
+                <a href="#api-ref">API</a>
+                <a href="https://github.com/defidaddydavid/polyswarm" class="nav-github" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="docs-sidebar">
+            <div class="sidebar-section">
+                <h4>Getting Started</h4>
+                <a href="#installation">Installation</a>
+                <a href="#configuration">Configuration</a>
+                <a href="#first-forecast">First Forecast</a>
+            </div>
+            <div class="sidebar-section">
+                <h4>Core Concepts</h4>
+                <a href="#forecast-mode">Forecast Mode</a>
+                <a href="#scenario-mode">Scenario Mode</a>
+                <a href="#agents-detail">Agents</a>
+                <a href="#calibration">Calibration</a>
+                <a href="#context-engine">Context Engine</a>
+            </div>
+            <div class="sidebar-section">
+                <h4>CLI Reference</h4>
+                <a href="#cli">Commands</a>
+                <a href="#cli-forecast">forecast</a>
+                <a href="#cli-scenario">scenario</a>
+                <a href="#cli-context">context</a>
+                <a href="#cli-resolve">resolve</a>
+                <a href="#cli-calibration">calibration</a>
+                <a href="#cli-serve">serve</a>
+            </div>
+            <div class="sidebar-section">
+                <h4>REST API</h4>
+                <a href="#api-ref">Endpoints</a>
+                <a href="#api-forecast">POST /forecast</a>
+                <a href="#api-scenario">POST /scenario</a>
+                <a href="#api-resolve">POST /resolve</a>
+                <a href="#api-calibration">GET /calibration</a>
+                <a href="#api-agents">GET /agents</a>
+            </div>
+            <div class="sidebar-section">
+                <h4>Advanced</h4>
+                <a href="#multi-llm">Multi-LLM Setup</a>
+                <a href="#docker">Docker</a>
+                <a href="#custom-personas">Custom Personas</a>
+                <a href="#data-sources">Data Sources</a>
+            </div>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Documentation</h1>
+            <p class="docs-intro">Everything you need to run, configure, and extend PolySwarm.</p>
+
+            <!-- Installation -->
+            <section id="installation">
+                <h2>Installation</h2>
+                <h3>Requirements</h3>
+                <ul>
+                    <li>Python 3.11+</li>
+                    <li>An API key from Anthropic, OpenAI, or a local Ollama instance</li>
+                </ul>
+                <h3>Install</h3>
+                <div class="code-block">
+                    <pre><code>git clone https://github.com/defidaddydavid/polyswarm.git
+cd polyswarm
+pip install -r requirements.txt
+cp .env.example .env</code></pre>
+                </div>
+            </section>
+
+            <!-- Configuration -->
+            <section id="configuration">
+                <h2>Configuration</h2>
+                <p>All configuration is via <code>.env</code> file or environment variables.</p>
+                <table class="docs-table">
+                    <thead>
+                        <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>LLM_PROVIDER</code></td><td>anthropic</td><td>LLM provider: anthropic, openai, or ollama</td></tr>
+                        <tr><td><code>ANTHROPIC_API_KEY</code></td><td>—</td><td>Anthropic API key</td></tr>
+                        <tr><td><code>OPENAI_API_KEY</code></td><td>—</td><td>OpenAI API key (if using openai provider)</td></tr>
+                        <tr><td><code>OLLAMA_BASE_URL</code></td><td>http://localhost:11434</td><td>Ollama server URL</td></tr>
+                        <tr><td><code>MODEL_FAST</code></td><td>auto</td><td>Model override (e.g. claude-sonnet-4-20250514, gpt-4o-mini)</td></tr>
+                        <tr><td><code>DEBATE_ROUNDS</code></td><td>2</td><td>Number of debate rounds per forecast</td></tr>
+                        <tr><td><code>SWARM_SIZE</code></td><td>12</td><td>Number of agents in the swarm</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- First Forecast -->
+            <section id="first-forecast">
+                <h2>First Forecast</h2>
+                <div class="code-block">
+                    <pre><code>python main.py forecast "Will BTC close above $100k before June 2026?" --odds 0.42</code></pre>
+                </div>
+                <p>The <code>--odds</code> flag is optional. If provided, PolySwarm calculates the edge between the swarm's probability and the market odds.</p>
+            </section>
+
+            <!-- Forecast Mode -->
+            <section id="forecast-mode">
+                <h2>Forecast Mode</h2>
+                <p>Forecast mode handles <strong>binary questions</strong> — anything with a YES/NO resolution.</p>
+                <h3>How it works</h3>
+                <ol>
+                    <li><strong>Context injection</strong> — 15+ live data sources are fetched in parallel</li>
+                    <li><strong>Round 1</strong> — each agent independently forms a probability estimate + reasoning</li>
+                    <li><strong>Round 2+</strong> — agents see each other's estimates and can update or defend</li>
+                    <li><strong>Aggregation</strong> — confidence-weighted average, adjusted by historical calibration</li>
+                    <li><strong>Edge calculation</strong> — if market odds are provided, the edge is computed</li>
+                </ol>
+            </section>
+
+            <!-- Scenario Mode -->
+            <section id="scenario-mode">
+                <h2>Scenario Mode</h2>
+                <p>Scenario mode answers: <strong>"If X happens, what follows?"</strong></p>
+                <div class="code-block">
+                    <pre><code>python main.py scenario "Fed announces emergency rate cut" --context "BTC at $87k"</code></pre>
+                </div>
+                <h3>Output includes</h3>
+                <ul>
+                    <li>Each agent's immediate reaction and specific actions</li>
+                    <li>Sentiment shift per agent (-1.0 to +1.0)</li>
+                    <li>Estimated price impact percentage</li>
+                    <li>Aggregated crowd sentiment and consensus</li>
+                    <li>Generated crowd narrative</li>
+                    <li>3-4 second-order effects</li>
+                </ul>
+            </section>
+
+            <!-- Agents Detail -->
+            <section id="agents-detail">
+                <h2>Agents</h2>
+                <p>PolySwarm ships with 12 agents. Each has:</p>
+                <ul>
+                    <li><strong>Persona</strong> — their identity and expertise</li>
+                    <li><strong>Information focus</strong> — what data they prioritize</li>
+                    <li><strong>Bias profile</strong> — documented blind spots</li>
+                    <li><strong>Base confidence</strong> — how confident they typically are</li>
+                    <li><strong>Memory</strong> — accumulates observations over time</li>
+                </ul>
+                <p>Agents are defined in <code>agents/personas.py</code>. See <a href="#custom-personas">Custom Personas</a> to add your own.</p>
+            </section>
+
+            <!-- Calibration -->
+            <section id="calibration">
+                <h2>Calibration</h2>
+                <p>Every forecast is stored in a SQLite database. When a market resolves, call <code>resolve</code> to compute Brier scores.</p>
+                <div class="code-block">
+                    <pre><code># Resolve a forecast
+python main.py resolve "Will BTC hit $100k?" --outcome 1.0
+
+# View calibration leaderboard
+python main.py calibration</code></pre>
+                </div>
+                <p><strong>Brier score</strong>: mean((forecast - outcome)²). Lower = better. Perfect = 0.0, random = 0.25.</p>
+                <p>Agents with better calibration automatically receive higher weight in future forecasts via <code>get_calibration_weights()</code>.</p>
+            </section>
+
+            <!-- Context Engine -->
+            <section id="context-engine">
+                <h2>Context Engine</h2>
+                <p>Before any forecast or scenario, PolySwarm fetches live data from 15+ free APIs using parallel threads (ThreadPoolExecutor, 12 workers).</p>
+                <div class="code-block">
+                    <pre><code># See exactly what data agents receive:
+python main.py context</code></pre>
+                </div>
+                <p>Data sources include: Binance spot + futures, Deribit options, DeFi Llama, CoinGecko, Fear & Greed, Reddit, CryptoPanic, Polymarket, Manifold, Mempool.space, Etherscan, and Blockchain.info.</p>
+            </section>
+
+            <!-- CLI Reference -->
+            <section id="cli">
+                <h2>CLI Reference</h2>
+
+                <div id="cli-forecast" class="cli-command">
+                    <h3><code>forecast</code></h3>
+                    <div class="code-block"><pre><code>python main.py forecast QUESTION [--odds FLOAT] [--rounds INT] [--size INT]</code></pre></div>
+                    <table class="docs-table">
+                        <thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>QUESTION</code></td><td>Yes</td><td>The binary question to forecast</td></tr>
+                            <tr><td><code>--odds</code></td><td>No</td><td>Current market odds (0.0-1.0) for edge calculation</td></tr>
+                            <tr><td><code>--rounds</code></td><td>No</td><td>Number of debate rounds (default: 2)</td></tr>
+                            <tr><td><code>--size</code></td><td>No</td><td>Number of agents (default: 12)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="cli-scenario" class="cli-command">
+                    <h3><code>scenario</code></h3>
+                    <div class="code-block"><pre><code>python main.py scenario DESCRIPTION [--context TEXT]</code></pre></div>
+                    <table class="docs-table">
+                        <thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>DESCRIPTION</code></td><td>Yes</td><td>The scenario to simulate</td></tr>
+                            <tr><td><code>--context</code></td><td>No</td><td>Additional context for the scenario</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="cli-context" class="cli-command">
+                    <h3><code>context</code></h3>
+                    <div class="code-block"><pre><code>python main.py context [QUESTION]</code></pre></div>
+                    <p>Shows all live data sources the agents see. Optionally pass a question for market-specific search.</p>
+                </div>
+
+                <div id="cli-resolve" class="cli-command">
+                    <h3><code>resolve</code></h3>
+                    <div class="code-block"><pre><code>python main.py resolve QUESTION --outcome FLOAT</code></pre></div>
+                    <p>Resolve a forecast. Outcome: 1.0 = YES, 0.0 = NO. Updates Brier scores.</p>
+                </div>
+
+                <div id="cli-calibration" class="cli-command">
+                    <h3><code>calibration</code></h3>
+                    <div class="code-block"><pre><code>python main.py calibration</code></pre></div>
+                    <p>Display Brier scores for all agents and the swarm aggregate.</p>
+                </div>
+
+                <div id="cli-serve" class="cli-command">
+                    <h3><code>serve</code></h3>
+                    <div class="code-block"><pre><code>python main.py serve [--host TEXT] [--port INT]</code></pre></div>
+                    <p>Start the FastAPI server. Default: 0.0.0.0:8000. Interactive docs at /docs.</p>
+                </div>
+            </section>
+
+            <!-- API Reference -->
+            <section id="api-ref">
+                <h2>REST API Reference</h2>
+                <p>Start the server with <code>python main.py serve</code>. Interactive Swagger docs at <code>/docs</code>.</p>
+
+                <div id="api-forecast" class="api-endpoint">
+                    <h3><span class="method post">POST</span> /forecast</h3>
+                    <div class="code-block"><pre><code>{
+  "question": "Will BTC hit $150k in 2026?",
+  "market_odds": 0.25,
+  "rounds": 2
+}</code></pre></div>
+                    <p>Returns: swarm probability, consensus score, individual agent estimates, edge vs market.</p>
+                </div>
+
+                <div id="api-scenario" class="api-endpoint">
+                    <h3><span class="method post">POST</span> /scenario</h3>
+                    <div class="code-block"><pre><code>{
+  "scenario": "Binance announces insolvency",
+  "context": "BTC at $87k, market euphoric"
+}</code></pre></div>
+                    <p>Returns: per-agent reactions, sentiment shifts, price impact, crowd narrative, secondary effects.</p>
+                </div>
+
+                <div id="api-resolve" class="api-endpoint">
+                    <h3><span class="method post">POST</span> /resolve</h3>
+                    <div class="code-block"><pre><code>{
+  "question": "Will BTC hit $150k in 2026?",
+  "outcome": 1.0
+}</code></pre></div>
+                </div>
+
+                <div id="api-calibration" class="api-endpoint">
+                    <h3><span class="method get">GET</span> /calibration</h3>
+                    <p>Returns swarm and per-agent Brier scores.</p>
+                </div>
+
+                <div id="api-agents" class="api-endpoint">
+                    <h3><span class="method get">GET</span> /agents</h3>
+                    <p>Returns list of all agents with their persona definitions.</p>
+                </div>
+            </section>
+
+            <!-- Multi-LLM -->
+            <section id="multi-llm">
+                <h2>Multi-LLM Setup</h2>
+                <h3>Anthropic (default)</h3>
+                <div class="code-block"><pre><code>LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...</code></pre></div>
+
+                <h3>OpenAI</h3>
+                <div class="code-block"><pre><code>LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+MODEL_FAST=gpt-4o-mini</code></pre></div>
+
+                <h3>Ollama (local, free)</h3>
+                <div class="code-block"><pre><code>LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+MODEL_FAST=llama3.1:8b</code></pre></div>
+
+                <h3>Any OpenAI-compatible (Groq, Together, etc.)</h3>
+                <div class="code-block"><pre><code>LLM_PROVIDER=openai
+OPENAI_API_KEY=gsk_...
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
+MODEL_FAST=llama-3.1-70b-versatile</code></pre></div>
+            </section>
+
+            <!-- Docker -->
+            <section id="docker">
+                <h2>Docker</h2>
+                <div class="code-block"><pre><code># One command
+ANTHROPIC_API_KEY=your_key docker compose up
+
+# Or with OpenAI
+LLM_PROVIDER=openai OPENAI_API_KEY=your_key docker compose up</code></pre></div>
+                <p>API available at <code>http://localhost:8000</code>. Docs at <code>/docs</code>.</p>
+            </section>
+
+            <!-- Custom Personas -->
+            <section id="custom-personas">
+                <h2>Custom Personas</h2>
+                <p>Edit <code>agents/personas.py</code> to add your own agent:</p>
+                <div class="code-block"><pre><code>{
+    "agent_id": "meme_trader",
+    "persona": "Meme Coin Degen",
+    "description": "Trades exclusively based on meme momentum...",
+    "information_focus": "Twitter mentions, TikTok trends, Telegram pump groups",
+    "bias_profile": "Extremely short-term. Will ape into anything trending.",
+    "base_confidence": 0.45,
+}</code></pre></div>
+                <p>Add it to <code>PERSONA_DEFINITIONS</code> and it will be included in the next swarm run.</p>
+            </section>
+
+            <!-- Data Sources -->
+            <section id="data-sources">
+                <h2>Data Sources</h2>
+                <p>All data is fetched in parallel via ThreadPoolExecutor. Most sources require no API key.</p>
+                <table class="docs-table">
+                    <thead><tr><th>Source</th><th>Module</th><th>Data</th><th>Key Required</th></tr></thead>
+                    <tbody>
+                        <tr><td>Binance</td><td>data/context.py</td><td>BTC, ETH, SOL spot prices</td><td>No</td></tr>
+                        <tr><td>Binance Futures</td><td>data/derivatives.py</td><td>Funding, OI, L/S ratios, liquidations</td><td>No</td></tr>
+                        <tr><td>Deribit</td><td>data/derivatives.py</td><td>BTC options OI, put/call, vol</td><td>No</td></tr>
+                        <tr><td>DeFi Llama</td><td>data/onchain.py</td><td>TVL, top protocols, stablecoins</td><td>No</td></tr>
+                        <tr><td>Mempool.space</td><td>data/onchain.py</td><td>BTC mempool, fees</td><td>No</td></tr>
+                        <tr><td>Alternative.me</td><td>data/news.py</td><td>Fear & Greed Index</td><td>No</td></tr>
+                        <tr><td>Reddit</td><td>data/social.py</td><td>r/cryptocurrency hot posts</td><td>No</td></tr>
+                        <tr><td>CoinGecko</td><td>data/social.py</td><td>Trending coins, market overview</td><td>No</td></tr>
+                        <tr><td>Polymarket</td><td>data/prediction_markets.py</td><td>Trending markets + odds</td><td>No</td></tr>
+                        <tr><td>Manifold</td><td>data/prediction_markets.py</td><td>Trending markets + odds</td><td>No</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>🐝 PolySwarm</span>
+            <span>Built by <a href="https://github.com/defidaddydavid">@defidaddydavid</a></span>
+            <span>MIT License</span>
+        </div>
+    </footer>
+</body>
+</html>

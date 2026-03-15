@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════
+   PolySwarm Docs — Sidebar Layout
+   ═══════════════════════════════════════════ */
+
+.docs-layout {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 56px;
+    min-height: 100vh;
+}
+
+.docs-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    padding: 2rem 1.5rem;
+    border-right: 1px solid var(--border);
+}
+
+.sidebar-section {
+    margin-bottom: 1.75rem;
+}
+
+.sidebar-section h4 {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-section a {
+    display: block;
+    padding: 0.25rem 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    transition: color 0.15s;
+}
+
+.sidebar-section a:hover {
+    color: var(--accent);
+}
+
+.docs-content {
+    flex: 1;
+    padding: 3rem 3rem 5rem;
+    max-width: 800px;
+}
+
+.docs-content h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.docs-intro {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    margin-bottom: 3rem;
+}
+
+.docs-content h2 {
+    font-size: 1.5rem;
+    margin-top: 3.5rem;
+    margin-bottom: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.docs-content h2:first-of-type {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.docs-content h3 {
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.docs-content p {
+    margin-bottom: 1rem;
+    color: var(--text);
+    line-height: 1.7;
+}
+
+.docs-content ul, .docs-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.25rem;
+}
+
+.docs-content li {
+    margin-bottom: 0.35rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.docs-content code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: #1a1a1a;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: var(--accent);
+}
+
+.code-block {
+    background: var(--bg-terminal);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.code-block pre {
+    margin: 0;
+}
+
+.code-block code {
+    background: none;
+    padding: 0;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--text);
+}
+
+.docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+}
+
+.docs-table th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+}
+
+.docs-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #1a1a1a;
+    color: var(--text-muted);
+}
+
+.docs-table td code {
+    font-size: 0.8rem;
+}
+
+.cli-command, .api-endpoint {
+    margin-bottom: 2rem;
+}
+
+.method {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+}
+
+.method.post {
+    background: #22c55e20;
+    color: var(--green);
+    border: 1px solid #22c55e40;
+}
+
+.method.get {
+    background: #06b6d420;
+    color: var(--cyan);
+    border: 1px solid #06b6d440;
+}
+
+@media (max-width: 768px) {
+    .docs-layout {
+        flex-direction: column;
+    }
+
+    .docs-sidebar {
+        width: 100%;
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem;
+    }
+
+    .docs-content {
+        padding: 2rem 1.5rem;
+    }
+}
