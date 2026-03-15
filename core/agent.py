@@ -1,25 +1,102 @@
 """
-Base agent class. Each agent has a persona, memory, and reasoning style.
-They take a question + context, form a probability estimate, then can
-update after seeing other agents' reasoning (debate rounds).
+Base agent class with multi-LLM support.
+Supports: Anthropic Claude, OpenAI GPT, Ollama (local models).
 """
 
 from __future__ import annotations
 import os
+import json
 from dataclasses import dataclass, field
 from typing import Optional
-import anthropic
 from pydantic import BaseModel
 
 
 class AgentEstimate(BaseModel):
     agent_id: str
     persona: str
-    probability: float          # 0.0 - 1.0
-    confidence: float           # 0.0 - 1.0 (self-reported)
+    probability: float
+    confidence: float
     reasoning: str
     key_factors: list[str]
     round: int
+
+
+def _get_llm_client():
+    """Factory for LLM client based on LLM_PROVIDER env var."""
+    provider = os.getenv("LLM_PROVIDER", "anthropic").lower()
+
+    if provider == "anthropic":
+        import anthropic
+        return "anthropic", anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    elif provider == "openai":
+        import openai
+        return "openai", openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    elif provider == "ollama":
+        import httpx
+        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        return "ollama", httpx.Client(base_url=base_url, timeout=60)
+    else:
+        raise ValueError(f"Unknown LLM_PROVIDER: {provider}. Use 'anthropic', 'openai', or 'ollama'.")
+
+
+def _get_model_name() -> str:
+    provider = os.getenv("LLM_PROVIDER", "anthropic").lower()
+    model_env = os.getenv("MODEL_FAST")
+    if model_env:
+        return model_env
+    defaults = {
+        "anthropic": "claude-sonnet-4-20250514",
+        "openai": "gpt-4o-mini",
+        "ollama": "llama3.1:8b",
+    }
+    return defaults.get(provider, "claude-sonnet-4-20250514")
+
+
+def _call_llm(provider: str, client, system: str, user: str, max_tokens: int = 512) -> str:
+    """Unified LLM call across providers."""
+    model = _get_model_name()
+
+    if provider == "anthropic":
+        response = client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        return response.content[0].text.strip()
+
+    elif provider == "openai":
+        response = client.chat.completions.create(
+            model=model,
+            max_tokens=max_tokens,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        )
+        return response.choices[0].message.content.strip()
+
+    elif provider == "ollama":
+        resp = client.post("/api/chat", json={
+            "model": model,
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        })
+        return resp.json()["message"]["content"].strip()
+
+    raise ValueError(f"Unknown provider: {provider}")
+
+
+def _parse_json(raw: str) -> dict:
+    """Parse JSON from LLM response, handling code fences."""
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return json.loads(raw.strip())
 
 
 @dataclass
@@ -34,8 +111,7 @@ class Agent:
     estimates_history: list[AgentEstimate] = field(default_factory=list)
 
     def __post_init__(self):
-        self._client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        self._model = os.getenv("MODEL_FAST", "claude-3-5-haiku-20241022")
+        self._provider, self._client = _get_llm_client()
 
     def _build_system_prompt(self) -> str:
         return f"""You are a {self.persona} participating in a prediction market forecasting exercise.
@@ -63,13 +139,7 @@ Output ONLY valid JSON, no other text."""
         debate_round: int = 1,
         other_estimates: Optional[list[AgentEstimate]] = None,
     ) -> AgentEstimate:
-        """Form a probability estimate, optionally after seeing others' views."""
-
-        user_content = f"""Question: {question}
-
-Context:
-{context}
-"""
+        user_content = f"Question: {question}\n\nContext:\n{context}\n"
 
         if other_estimates and debate_round > 1:
             others_summary = "\n".join([
@@ -77,32 +147,14 @@ Context:
                 for e in other_estimates
                 if e.agent_id != self.agent_id
             ])
-            user_content += f"""
---- Other agents' estimates (Round {debate_round - 1}) ---
-{others_summary}
-
-Consider their perspectives. You may update your estimate or defend your original position.
-"""
+            user_content += f"\n--- Other agents' estimates (Round {debate_round - 1}) ---\n{others_summary}\n\nConsider their perspectives. You may update your estimate or defend your original position.\n"
 
         if self.memory:
-            memory_str = "\n".join(self.memory[-5:])  # last 5 memories
+            memory_str = "\n".join(self.memory[-5:])
             user_content += f"\nYour relevant past observations:\n{memory_str}"
 
-        response = self._client.messages.create(
-            model=self._model,
-            max_tokens=512,
-            system=self._build_system_prompt(),
-            messages=[{"role": "user", "content": user_content}],
-        )
-
-        import json
-        raw = response.content[0].text.strip()
-        # strip markdown code fences if present
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        data = json.loads(raw.strip())
+        raw = _call_llm(self._provider, self._client, self._build_system_prompt(), user_content)
+        data = _parse_json(raw)
 
         estimate = AgentEstimate(
             agent_id=self.agent_id,

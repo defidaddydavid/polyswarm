@@ -8,12 +8,13 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from typing import Optional
-import anthropic
 import json
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich import box
+
+from core.agent import _get_llm_client, _call_llm, _parse_json
 
 console = Console()
 
@@ -43,8 +44,7 @@ class ScenarioResult:
 
 class ScenarioEngine:
     def __init__(self):
-        self._client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        self._model = os.getenv("MODEL_FAST", "claude-3-5-haiku-20241022")
+        self._provider, self._client = _get_llm_client()
 
     def simulate(self, scenario: str, context: str = "") -> ScenarioResult:
         """Simulate crowd reactions to a scenario across all market participant archetypes."""
@@ -81,18 +81,8 @@ Output ONLY valid JSON with these fields:
 React now."""
 
             try:
-                resp = self._client.messages.create(
-                    model=self._model,
-                    max_tokens=512,
-                    system=system,
-                    messages=[{"role": "user", "content": user}]
-                )
-                raw = resp.content[0].text.strip()
-                if raw.startswith("```"):
-                    raw = raw.split("```")[1]
-                    if raw.startswith("json"):
-                        raw = raw[4:]
-                data = json.loads(raw.strip())
+                raw = _call_llm(self._provider, self._client, system, user)
+                data = _parse_json(raw)
 
                 reaction = ScenarioReaction(
                     agent_id=persona_def["agent_id"],
@@ -148,7 +138,8 @@ React now."""
             for r in reactions
         ])
 
-        prompt = f"""Given this scenario and these market participant reactions, write:
+        system = "You are a market analyst synthesizing crowd reactions into a narrative."
+        user = f"""Given this scenario and these market participant reactions, write:
 1. A 2-sentence "crowd narrative" — the dominant story that emerges from these reactions combined
 2. 3-4 second-order effects (what happens NEXT, after the initial reaction)
 
@@ -164,17 +155,8 @@ Output JSON with:
 - secondary_effects: list of strings"""
 
         try:
-            resp = self._client.messages.create(
-                model=self._model,
-                max_tokens=400,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            raw = resp.content[0].text.strip()
-            if raw.startswith("```"):
-                raw = raw.split("```")[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-            data = json.loads(raw.strip())
+            raw = _call_llm(self._provider, self._client, system, user, max_tokens=400)
+            data = _parse_json(raw)
             return data["narrative"], data.get("secondary_effects", [])
         except Exception:
             return "Mixed reactions across market participants.", []
