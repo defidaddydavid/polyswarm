@@ -97,5 +97,18 @@ def calibration():
         console.print(table)
 
 
+@app.command()
+def context(
+    question: str = typer.Argument("", help="Optional question for question-specific market search"),
+):
+    """Show all live data sources the agents see (debug/exploration)."""
+    from data.context import build_context
+    from rich.panel import Panel
+
+    console.print("[bold]Fetching all data sources...[/bold]\n")
+    ctx = build_context(question)
+    console.print(Panel(ctx, title="Agent Context (Live Data)", border_style="cyan"))
+
+
 if __name__ == "__main__":
     app()

@@ -202,6 +202,61 @@ curl http://localhost:8000/agents
 
 ---
 
+## Live Data Sources
+
+PolySwarm injects **real-time market data** from 15+ free APIs into every agent's context. No API keys required for most sources.
+
+| Category | Source | Data |
+|----------|--------|------|
+| **Price** | Binance | BTC, ETH, SOL spot + 24h stats |
+| **Derivatives** | Binance Futures | Funding rates (6 assets), OI, long/short ratios, top trader positions, liquidations |
+| **Options** | Deribit | BTC options OI, put/call ratio, historical vol |
+| **DeFi** | DeFi Llama | Total TVL, top protocols, stablecoin supply |
+| **On-Chain** | Mempool.space | BTC mempool, fee estimates |
+| **On-Chain** | Blockchain.info | BTC hashrate, supply |
+| **Gas** | Etherscan | ETH gas prices |
+| **Sentiment** | Alternative.me | Fear & Greed (7-day history) |
+| **Social** | Reddit | r/cryptocurrency hot posts |
+| **Social** | CoinGecko | Trending coins, market overview, BTC dominance |
+| **News** | CryptoPanic | Latest crypto headlines |
+| **Markets** | Polymarket | Trending prediction markets + odds |
+| **Markets** | Manifold | Trending markets + probabilities |
+
+Run `python main.py context` to see all live data:
+
+```
+$ python main.py context
+
+  BTC/USDT: $87,240  |  24h: +2.12%  |  Volume: $28.5B
+  ETH/USDT: $3,180   |  24h: +1.85%
+
+  Fear & Greed (7 days): Greed (71) → Greed (68) → Neutral (55) → ...
+
+  Funding Rates:
+    + BTC: +0.0105%
+    + ETH: +0.0082%
+    - SOL: -0.0034%
+
+  Open Interest:
+    BTC: 125,420 contracts ($10.94B)
+    ETH: 2,340,120 contracts ($7.43B)
+
+  BTC Options (Deribit):
+    Total OI: 42,500 BTC | Put/Call: 0.58 (bullish)
+
+  DeFi Total TVL: $142.8B (+0.3% 24h)
+  Stablecoin Supply ($185B total):
+    USDT: $142.1B | USDC: $32.4B | DAI: $5.2B
+
+  Reddit r/cryptocurrency (hot):
+    [1,240 pts] "BTC just broke through $87k resistance..."
+
+  Polymarket Trending:
+    [72.5% YES | $12,450,000 vol] Will Trump win 2028?
+```
+
+---
+
 ## The 12 Agents
 
 | # | Agent | Focus | Known Bias |
