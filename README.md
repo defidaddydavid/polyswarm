@@ -12,8 +12,8 @@
 
 <br />
 
-*12 AI agents with distinct personas debate in real-time, informed by 15+ live data feeds,*
-*to produce calibrated probability estimates via 7 aggregation methods and crowd simulations.*
+*12 AI agents with distinct personas debate in real-time, informed by 23 live data sources,*
+*to produce calibrated probability estimates via 10 aggregation methods and crowd simulations.*
 
 <br />
 
@@ -55,7 +55,7 @@ python main.py forecast \
 **Output:**
 - Probability estimate from 12 independent agents
 - Multi-round debate (agents update after seeing others)
-- 7 aggregation methods: Bayesian, extremized, surprisingly popular, LogOP, Cooke's, MC, bootstrap CI
+- 10 aggregation methods: Bayesian, extremized, surprisingly popular, LogOP, Cooke's, meta-probability, neutral pivot, MC, bootstrap CI, coherence check
 - Herding detection, Nash equilibrium, information cascades
 - Edge calculation vs live market odds
 
@@ -143,7 +143,7 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
                              │
                     ┌────────▼─────────┐
                     │  Context Engine   │
-                    │  (15+ live APIs)  │
+                    │  (23 live APIs)   │
                     └────────┬─────────┘
                              │
               ┌──────────────▼──────────────┐
@@ -178,7 +178,7 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
 
 ## Statistical Analysis
 
-Every forecast runs through a full statistical analysis pipeline — 7 aggregation methods plus game-theoretic analysis:
+Every forecast runs through a full statistical analysis pipeline — 10 aggregation methods plus game-theoretic analysis:
 
 ### Aggregation Methods
 
@@ -189,6 +189,9 @@ Every forecast runs through a full statistical analysis pipeline — 7 aggregati
 | **Surprisingly Popular** | `core/surprisingly_popular.py` | Prelec et al. (2017, *Nature*). Exploits meta-cognitive information — the correct answer is often "more popular than people predict." |
 | **Log Opinion Pool** | `core/opinion_pool.py` | Multiplicative combination in log space. Satisfies external Bayesianity — theoretically optimal when agents share likelihoods. |
 | **Cooke's Classical Model** | `core/opinion_pool.py` | Performance-based weighting from expert elicitation theory. Weights by calibration AND informativeness. Unqualified agents are pruned. |
+| **Meta-Probability Weighting** | `core/meta_probability.py` | Palley & Satopää (2023). Weights agents by information signal gap — agents whose estimates differ most from base rate carry more weight. |
+| **Neutral Pivoting** | `core/meta_probability.py` | Shared-information bias correction. Removes the common prior component to isolate each agent's private information signal. |
+| **Coherence Check** | `core/coherence.py` | Mandel (2024). Tests probability axiom consistency — bounds, complementarity, union bounds. Flags incoherent agents. |
 | **Monte Carlo Simulation** | `core/statistics.py` | 5,000 simulations treating each agent as a beta distribution. Produces percentiles, skew, and threshold probabilities. |
 | **Bootstrap CI** | `core/statistics.py` | Resamples agent estimates 1,000 times to produce 95% confidence intervals. Quantifies uncertainty in the consensus. |
 
@@ -381,7 +384,7 @@ python main.py calibration
 - [x] Modular plugin-based data pipeline
 - [x] API key authentication
 - [x] Forecast history & calibration export
-- [x] 7 peer-reviewed aggregation methods
+- [x] 10 peer-reviewed aggregation methods
 - [ ] Live Polymarket sync + auto-compare leaderboard
 - [ ] Web UI with real-time debate viewer
 - [ ] Agent memory persistence (Redis)
@@ -401,7 +404,7 @@ python main.py calibration
 
 **MIT License** — use it, fork it, build on it.
 
-Built by [@defidaddydavid](https://github.com/defidaddydavid)
+Built by [@defidaddydavid](https://github.com/defidaddydavid) · Part of the [PlimaFlow](https://plimaflow.com) ecosystem
 
 *If this helps you find edge, drop a star*
 

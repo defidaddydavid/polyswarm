@@ -153,10 +153,10 @@ cp .env.example .env</code></pre>
                 <p>Forecast mode handles <strong>binary questions</strong> — anything with a YES/NO resolution.</p>
                 <h3>How it works</h3>
                 <ol>
-                    <li><strong>Context injection</strong> — 15+ live data sources are fetched in parallel</li>
+                    <li><strong>Context injection</strong> — 23 live data sources are fetched in parallel</li>
                     <li><strong>Round 1</strong> — each agent independently forms a probability estimate + reasoning</li>
                     <li><strong>Round 2+</strong> — agents see each other's estimates and can update or defend</li>
-                    <li><strong>Aggregation</strong> — seven methods: confidence-weighted, Bayesian, Monte Carlo, extremized (IARPA), surprisingly popular (Prelec), logarithmic opinion pool, and Cooke's classical model</li>
+                    <li><strong>Aggregation</strong> — ten methods: confidence-weighted, Bayesian, Monte Carlo, extremized (IARPA), surprisingly popular (Prelec), logarithmic opinion pool, Cooke's classical model, meta-probability weighting (Palley/Satopaa), neutral pivoting, and coherence checking (Mandel)</li>
                     <li><strong>Analysis</strong> — herding detection, information cascade tracking, Nash equilibrium check, Jensen-Shannon divergence matrix</li>
                     <li><strong>Edge calculation</strong> — if market odds are provided, the edge is computed for all methods</li>
                 </ol>
@@ -209,7 +209,7 @@ python main.py calibration</code></pre>
 
             <section id="context-engine">
                 <h2>Context Engine</h2>
-                <p>Before any forecast or scenario, PolySwarm fetches live data from 15+ free APIs using parallel threads (ThreadPoolExecutor, 12 workers, 15s timeout per source).</p>
+                <p>Before any forecast or scenario, PolySwarm fetches live data from 23 sources via a modular plugin registry (ThreadPoolExecutor, 12 workers, 15s timeout per source).</p>
                 <div class="code-block">
                     <pre><code># See exactly what data agents receive (outputs formatted text sections):
 python main.py context
@@ -646,6 +646,7 @@ class MyCustomSource(DataSource):
                 PolySwarm
             </span>
             <span>Built by <a href="https://github.com/defidaddydavid">@defidaddydavid</a></span>
+            <span>Part of <a href="https://plimaflow.com" target="_blank">PlimaFlow</a></span>
             <span>MIT License</span>
         </div>
     </footer>
