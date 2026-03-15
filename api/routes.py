@@ -3,7 +3,9 @@ FastAPI routes for PolySwarm.
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Optional
 from core.swarm import Swarm
 from core.calibration import (
     get_swarm_brier_score,
@@ -14,7 +16,14 @@ from core.calibration import (
 app = FastAPI(
     title="PolySwarm",
     description="Multi-agent AI forecasting engine for prediction markets",
-    version="0.1.0",
+    version="0.2.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 swarm = Swarm()
@@ -22,19 +31,59 @@ swarm = Swarm()
 
 class ForecastRequest(BaseModel):
     question: str
-    market_odds: float | None = None
+    market_odds: Optional[float] = None
+    rounds: Optional[int] = None
+
+
+class ScenarioRequest(BaseModel):
+    scenario: str
+    context: Optional[str] = ""
 
 
 class ResolveRequest(BaseModel):
     question: str
-    outcome: float  # 1.0 = YES, 0.0 = NO
+    outcome: float
 
 
 @app.post("/forecast")
 async def forecast(req: ForecastRequest):
     try:
+        import os
+        if req.rounds:
+            os.environ["DEBATE_ROUNDS"] = str(req.rounds)
         result = swarm.forecast(req.question, req.market_odds)
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/scenario")
+async def scenario(req: ScenarioRequest):
+    try:
+        from core.scenario import ScenarioEngine
+        engine = ScenarioEngine()
+        result = engine.simulate(req.scenario, req.context or "")
+        return {
+            "scenario": result.scenario,
+            "aggregate_sentiment": result.aggregate_sentiment,
+            "aggregate_price_impact": result.aggregate_price_impact,
+            "consensus": result.consensus,
+            "narrative": result.narrative,
+            "secondary_effects": result.secondary_effects,
+            "reactions": [
+                {
+                    "agent_id": r.agent_id,
+                    "persona": r.persona,
+                    "immediate_reaction": r.immediate_reaction,
+                    "sentiment_shift": r.sentiment_shift,
+                    "price_impact_estimate": r.price_impact_estimate,
+                    "confidence": r.confidence,
+                    "reasoning": r.reasoning,
+                    "actions": r.actions,
+                }
+                for r in result.reactions
+            ],
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -54,6 +103,12 @@ async def calibration():
     }
 
 
+@app.get("/agents")
+async def agents():
+    from agents.personas import PERSONA_DEFINITIONS
+    return {"agents": PERSONA_DEFINITIONS, "count": len(PERSONA_DEFINITIONS)}
+
+
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.1.0"}
+    return {"status": "ok", "version": "0.2.0", "agents": 12}

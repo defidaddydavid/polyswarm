@@ -6,55 +6,50 @@ and formats it as a string for agent consumption.
 from __future__ import annotations
 import httpx
 from datetime import datetime
+from data.news import fetch_crypto_news, fetch_fear_greed_extended, fetch_btc_dominance, fetch_top_movers
 
 
 def build_context(question: str) -> str:
-    """Build context string for a given question."""
+    """Build rich context string for a given question."""
     sections = []
-
     sections.append(f"Current UTC time: {datetime.utcnow().strftime('%Y-%m-%d %H:%M')}")
-
-    # Fear & Greed Index
-    try:
-        resp = httpx.get("https://api.alternative.me/fng/?limit=3", timeout=5)
-        data = resp.json()["data"]
-        fng_lines = [f"  {d['value_classification']} ({d['value']}) — {d['timestamp']}" for d in data]
-        sections.append("Crypto Fear & Greed Index (last 3 days):\n" + "\n".join(fng_lines))
-    except Exception:
-        sections.append("Fear & Greed Index: unavailable")
 
     # BTC price (Binance)
     try:
         resp = httpx.get("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT", timeout=5)
         d = resp.json()
         sections.append(
-            f"BTC/USDT 24h: Price=${float(d['lastPrice']):,.0f} | "
-            f"Change={float(d['priceChangePercent']):+.2f}% | "
-            f"Volume=${float(d['quoteVolume'])/1e9:.2f}B"
+            f"BTC/USDT: ${float(d['lastPrice']):,.0f}  |  24h: {float(d['priceChangePercent']):+.2f}%  |  "
+            f"Volume: ${float(d['quoteVolume'])/1e9:.2f}B  |  High: ${float(d['highPrice']):,.0f}  Low: ${float(d['lowPrice']):,.0f}"
         )
     except Exception:
-        sections.append("BTC price: unavailable")
+        pass
 
     # ETH price
     try:
         resp = httpx.get("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT", timeout=5)
         d = resp.json()
-        sections.append(
-            f"ETH/USDT 24h: Price=${float(d['lastPrice']):,.0f} | "
-            f"Change={float(d['priceChangePercent']):+.2f}%"
-        )
+        sections.append(f"ETH/USDT: ${float(d['lastPrice']):,.0f}  |  24h: {float(d['priceChangePercent']):+.2f}%")
     except Exception:
         pass
 
-    # BTC funding rate (Binance perpetual)
+    # BTC funding rate
     try:
-        resp = httpx.get(
-            "https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=3", timeout=5
-        )
+        resp = httpx.get("https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=3", timeout=5)
         rates = resp.json()
         avg_rate = sum(float(r["fundingRate"]) for r in rates) / len(rates)
-        sections.append(f"BTC Funding Rate (avg last 3): {avg_rate*100:.4f}% per 8h")
+        sentiment = "bullish" if avg_rate > 0.0001 else "bearish" if avg_rate < -0.0001 else "neutral"
+        sections.append(f"BTC Funding Rate (avg 3): {avg_rate*100:.4f}%/8h ({sentiment})")
     except Exception:
         pass
+
+    # Extended data
+    for fn in [fetch_fear_greed_extended, fetch_btc_dominance, fetch_top_movers, fetch_crypto_news]:
+        try:
+            result = fn()
+            if result:
+                sections.append(result)
+        except Exception:
+            pass
 
     return "\n\n".join(sections)
