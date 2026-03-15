@@ -66,29 +66,61 @@ def ensemble_aggregate(
     weighted_result: dict,
     bayesian_result: dict,
     mc_result: dict,
+    extremized_result: dict | None = None,
+    logop_result: dict | None = None,
+    sp_result: dict | None = None,
+    cooke_result: dict | None = None,
 ) -> dict:
     """
-    Ensemble of all three aggregation methods.
-    Weighted average of: standard weighted, Bayesian posterior, and MC mean.
+    Ensemble of all aggregation methods using robust median.
+    Combines: weighted, Bayesian, MC, extremized (IARPA),
+    log opinion pool, surprisingly popular (Prelec), Cooke's classical.
     """
     w_prob = weighted_result["probability"]
     b_prob = bayesian_result["bayesian_probability"]
     mc_prob = mc_result["mean"]
 
-    # ensemble: equal weight
-    ensemble = (w_prob + b_prob + mc_prob) / 3
+    methods = {
+        "weighted": round(w_prob, 4),
+        "bayesian": round(b_prob, 4),
+        "monte_carlo": round(mc_prob, 4),
+    }
+    all_probs = [w_prob, b_prob, mc_prob]
 
-    # spread: how much do the methods disagree?
-    spread = max(w_prob, b_prob, mc_prob) - min(w_prob, b_prob, mc_prob)
+    if extremized_result:
+        ext_p = extremized_result["extremized_probability"]
+        methods["extremized"] = round(ext_p, 4)
+        all_probs.append(ext_p)
+    if logop_result:
+        logop_p = logop_result["logop_probability"]
+        methods["log_opinion_pool"] = round(logop_p, 4)
+        all_probs.append(logop_p)
+    if sp_result:
+        sp_p = sp_result["sp_adjusted_probability"]
+        methods["surprisingly_popular"] = round(sp_p, 4)
+        all_probs.append(sp_p)
+    if cooke_result:
+        cooke_p = cooke_result["cooke_probability"]
+        methods["cooke_classical"] = round(cooke_p, 4)
+        all_probs.append(cooke_p)
+
+    # robust median
+    sorted_probs = sorted(all_probs)
+    n = len(sorted_probs)
+    if n % 2 == 0:
+        median = (sorted_probs[n // 2 - 1] + sorted_probs[n // 2]) / 2
+    else:
+        median = sorted_probs[n // 2]
+
+    mean = sum(all_probs) / n
+    spread = max(all_probs) - min(all_probs)
 
     return {
-        "ensemble_probability": round(ensemble, 4),
-        "ensemble_pct": f"{ensemble:.1%}",
+        "ensemble_probability": round(median, 4),
+        "ensemble_mean": round(mean, 4),
+        "ensemble_pct": f"{median:.1%}",
+        "n_methods": n,
         "method_spread": round(spread, 4),
-        "methods": {
-            "weighted": round(w_prob, 4),
-            "bayesian": round(b_prob, 4),
-            "monte_carlo": round(mc_prob, 4),
-        },
+        "methods": methods,
         "agreement": "high" if spread < 0.05 else "moderate" if spread < 0.10 else "low",
     }

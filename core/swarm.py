@@ -15,6 +15,9 @@ from core.aggregator import aggregate
 from core.bayesian import bayesian_aggregate, compute_agent_agreement_matrix
 from core.game_theory import detect_herding, compute_information_cascade, nash_equilibrium_check
 from core.statistics import bootstrap_confidence_interval, monte_carlo_scenarios
+from core.extremize import extremize
+from core.surprisingly_popular import surprisingly_popular
+from core.opinion_pool import logarithmic_opinion_pool, cooke_classical_weights
 from core.calibration import (
     init_db,
     save_forecast,
@@ -120,6 +123,26 @@ class Swarm:
         result["monte_carlo"] = mc
         console.print(f"  [dim]Monte Carlo (5K sims):[/dim] median={mc['percentiles']['p50']:.1%}, P(>50%)={mc['thresholds']['P(>50%)']:.0%}")
 
+        # 9. Extremized aggregation (Satopää/Baron/Tetlock IARPA)
+        ext = extremize(all_estimates)
+        result["extremized"] = ext
+        console.print(f"  [dim]Extremized (d={ext['extremizing_factor']:.2f}):[/dim] [bold]{ext['extremized_probability']:.1%}[/bold] (shift: {ext['shift']:+.1%})")
+
+        # 10. Surprisingly Popular algorithm (Prelec 2017)
+        sp = surprisingly_popular(all_estimates)
+        result["surprisingly_popular"] = sp
+        console.print(f"  [dim]Surprisingly Popular:[/dim] [bold]{sp['sp_adjusted_probability']:.1%}[/bold] (SP score: {sp['sp_score']:+.3f}, direction: {sp['surprise_direction']})")
+
+        # 11. Logarithmic opinion pool
+        logop = logarithmic_opinion_pool(all_estimates)
+        result["log_opinion_pool"] = logop
+        console.print(f"  [dim]Log Opinion Pool:[/dim] [bold]{logop['logop_probability']:.1%}[/bold] (vs linear: {logop['linear_probability']:.1%})")
+
+        # 12. Cooke's Classical Model (performance-based weighting)
+        cooke = cooke_classical_weights(all_estimates, calibration_weights)
+        result["cooke_classical"] = cooke
+        console.print(f"  [dim]Cooke's Classical:[/dim] [bold]{cooke['cooke_probability']:.1%}[/bold] ({cooke['n_qualified']}/{len(all_estimates)} agents qualified)")
+
         save_swarm_forecast(question, result["probability"], result["consensus_score"], market_odds)
 
         # print results
@@ -164,6 +187,20 @@ class Swarm:
                 f"Edge (Bayesian): [bold]{'+'if b_edge>0 else ''}{b_edge:.1%}[/bold]"
             )
 
+        # get new analysis results if available
+        ext_line = ""
+        if "extremized" in result:
+            ext = result["extremized"]
+            ext_line = f"\n  Extremized: {ext['extremized_probability']:.1%} (d={ext['extremizing_factor']:.2f})"
+        sp_line = ""
+        if "surprisingly_popular" in result:
+            sp = result["surprisingly_popular"]
+            sp_line = f"  |  SP: {sp['sp_adjusted_probability']:.1%}"
+        logop_line = ""
+        if "log_opinion_pool" in result:
+            logop = result["log_opinion_pool"]
+            logop_line = f"  |  LogOP: {logop['logop_probability']:.1%}"
+
         console.print(Panel(
             f"  [bold green]Weighted:  {result['probability_pct']}[/bold green]  |  "
             f"[bold cyan]Bayesian:  {bayesian['bayesian_probability']:.1%}[/bold cyan]  |  "
@@ -171,6 +208,7 @@ class Swarm:
             f"  95% CI: [{bootstrap['ci_lower']:.1%}, {bootstrap['ci_upper']:.1%}]  |  "
             f"MC median: {mc['percentiles']['p50']:.1%}  |  "
             f"Entropy: {bayesian['entropy']:.3f} bits"
+            f"{ext_line}{sp_line}{logop_line}"
             f"{odds_line}",
             title="⟐ Final Result",
             border_style="green",

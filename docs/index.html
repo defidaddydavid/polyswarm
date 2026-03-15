@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PolySwarm — Multi-Agent AI Forecasting Engine</title>
-    <meta name="description" content="12 AI agents debate to forecast prediction markets. Bayesian updating, Monte Carlo simulation, game theory. Open source.">
+    <meta name="description" content="12 AI agents debate to forecast prediction markets. Bayesian updating, Monte Carlo simulation, game theory, extremized aggregation. Open source.">
     <meta property="og:title" content="PolySwarm — Multi-Agent AI Forecasting Engine">
     <meta property="og:description" content="Predict markets. Simulate crowds. Find your edge.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
     <div class="grid-bg"></div>
@@ -34,7 +35,7 @@
                 <a href="#agents">Agents</a>
                 <a href="docs.html">Docs</a>
                 <a href="https://github.com/defidaddydavid/polyswarm" class="nav-github" target="_blank">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    <i data-lucide="github" style="width:16px;height:16px"></i>
                     Star
                 </a>
             </div>
@@ -45,13 +46,13 @@
         <div class="hero-badge">OPEN SOURCE · MIT LICENSED</div>
         <h1>Multi-Agent AI<br/><span class="gradient-text">Forecasting Engine</span></h1>
         <p class="hero-sub">Predict markets. Simulate crowds. Find your edge.</p>
-        <p class="hero-desc">12 AI agents with distinct personas debate in real-time — powered by Bayesian updating,<br/>Monte Carlo simulation, and game theory — informed by 15+ live data feeds.</p>
+        <p class="hero-desc">12 AI agents with distinct personas debate in real-time — powered by 7 aggregation methods<br/>including Bayesian updating, extremized aggregation, and game theory — informed by 15+ live data feeds.</p>
         <div class="hero-cta">
             <a href="https://github.com/defidaddydavid/polyswarm" class="btn btn-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                <i data-lucide="github" style="width:16px;height:16px"></i>
                 Star on GitHub
             </a>
-            <a href="#quickstart" class="btn btn-secondary">Get Started →</a>
+            <a href="#quickstart" class="btn btn-secondary">Get Started <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>
             <a href="docs.html" class="btn btn-ghost">Documentation</a>
         </div>
         <div class="hero-stats">
@@ -59,7 +60,7 @@
             <div class="stat-divider"></div>
             <div class="stat"><span class="stat-num">15+</span><span class="stat-label">Data Feeds</span></div>
             <div class="stat-divider"></div>
-            <div class="stat"><span class="stat-num">3</span><span class="stat-label">Aggregation Methods</span></div>
+            <div class="stat"><span class="stat-num">7</span><span class="stat-label">Aggregation Methods</span></div>
             <div class="stat-divider"></div>
             <div class="stat"><span class="stat-num">∞</span><span class="stat-label">LLM Providers</span></div>
         </div>
@@ -76,11 +77,12 @@
                     <span class="mode-tag">FORECAST</span>
                     <h3>Binary Probability</h3>
                 </div>
-                <p>Ask any yes/no question. Get a calibrated probability with confidence intervals, Bayesian posterior, and edge vs market odds.</p>
+                <p>Ask any yes/no question. Get a calibrated probability with confidence intervals, Bayesian posterior, extremized estimate, and edge vs market odds.</p>
                 <div class="terminal-mini">
 <pre>$ python main.py forecast "Will BTC hit $100k?" --odds 0.42
 
 <span class="t-green">Weighted:  48.7%</span> | <span class="t-cyan">Bayesian: 46.2%</span>
+<span class="t-yellow">Extremized: 51.3%</span> | LogOP: 47.8%
 95% CI: [38.1%, 57.3%]
 MC median: 47.5% | Entropy: 0.998 bits
 Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
@@ -108,43 +110,79 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
     <!-- Statistical Analysis -->
     <section class="section" id="analysis">
         <h2 class="section-title">Beyond Simple Averages</h2>
-        <p class="section-sub">Three aggregation methods. Game theory. Information theory. Real statistics.</p>
+        <p class="section-sub">Seven aggregation methods. Game theory. Information theory. Peer-reviewed science.</p>
         <div class="analysis-grid">
             <div class="analysis-card">
-                <div class="analysis-icon">∫</div>
+                <div class="analysis-icon"><i data-lucide="brain" style="width:24px;height:24px"></i></div>
                 <h4>Bayesian Updating</h4>
                 <p>Each agent's estimate is treated as evidence. Beliefs update via Bayes' theorem with KL-divergence weighting. More surprising estimates carry more information.</p>
                 <code>P(H|E) = P(E|H)·P(H) / P(E)</code>
             </div>
             <div class="analysis-card">
-                <div class="analysis-icon">◈</div>
+                <div class="analysis-icon"><i data-lucide="dice-5" style="width:24px;height:24px"></i></div>
                 <h4>Monte Carlo Simulation</h4>
                 <p>5,000 simulations treating each agent as a beta distribution parameterized by probability and confidence. Produces percentiles, skew, and threshold probabilities.</p>
                 <code>P(>50%) = 0.63 | Skew: -0.12</code>
             </div>
             <div class="analysis-card">
-                <div class="analysis-icon">⊛</div>
+                <div class="analysis-icon"><i data-lucide="arrow-up-from-dot" style="width:24px;height:24px"></i></div>
+                <h4>Extremized Aggregation</h4>
+                <p>Based on Satopää/Tetlock IARPA research. Transforms to log-odds space and applies extremizing factor d to correct systematic under-confidence in crowd averages.</p>
+                <code>logit(p_ext) = d · mean(logit(p_i))</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon"><i data-lucide="sparkles" style="width:24px;height:24px"></i></div>
+                <h4>Surprisingly Popular</h4>
+                <p>Prelec (2017, Nature). The correct answer is often more popular than people predict. Exploits private information agents leak through meta-predictions.</p>
+                <code>SP = actual_mean - predicted_mean</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon"><i data-lucide="combine" style="width:24px;height:24px"></i></div>
+                <h4>Log Opinion Pool</h4>
+                <p>Multiplicative combination in log space. Satisfies external Bayesianity — if agents are independent Bayesians with shared likelihood, recovers the correct posterior.</p>
+                <code>p_log = Π(p_i^w_i) / Z</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon"><i data-lucide="award" style="width:24px;height:24px"></i></div>
+                <h4>Cooke's Classical Model</h4>
+                <p>Performance-based weighting from expert elicitation theory. Weights by calibration AND informativeness. Unqualified agents are pruned from the pool.</p>
+                <code>w_i = calibration_i × info_i</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon"><i data-lucide="bar-chart-3" style="width:24px;height:24px"></i></div>
                 <h4>Bootstrap Confidence Intervals</h4>
                 <p>Resample agent estimates 1,000 times to produce 95% confidence intervals. Quantifies uncertainty in the swarm's consensus.</p>
                 <code>95% CI: [38.1%, 57.3%]</code>
             </div>
             <div class="analysis-card">
-                <div class="analysis-icon">⚔</div>
+                <div class="analysis-icon"><i data-lucide="users" style="width:24px;height:24px"></i></div>
                 <h4>Herding Detection</h4>
                 <p>HHI-based clustering analysis detects when agents converge suspiciously. Flags contrarian signals when the herd is wrong.</p>
                 <code>Herding: 0.72 → contrarian signal</code>
             </div>
             <div class="analysis-card">
-                <div class="analysis-icon">⇌</div>
+                <div class="analysis-icon"><i data-lucide="git-merge" style="width:24px;height:24px"></i></div>
                 <h4>Information Cascades</h4>
                 <p>Tracks how beliefs shift between debate rounds. Detects when agents flip sides, who moved most, and whether convergence was genuine.</p>
                 <code>Convergence: 78% | 2 agents flipped</code>
             </div>
             <div class="analysis-card">
-                <div class="analysis-icon">≋</div>
+                <div class="analysis-icon"><i data-lucide="scale" style="width:24px;height:24px"></i></div>
                 <h4>Nash Equilibrium</h4>
                 <p>Checks if the consensus is stable — would any agent benefit from deviating? Unstable equilibria signal low-confidence forecasts.</p>
                 <code>Stability: 0.92 → consensus holds</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon"><i data-lucide="sigma" style="width:24px;height:24px"></i></div>
+                <h4>Jensen-Shannon Divergence</h4>
+                <p>Pairwise agreement matrix between all agents. Identifies most aligned and most divergent pairs to surface hidden consensus patterns.</p>
+                <code>Most divergent: Skeptic | Native</code>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-icon"><i data-lucide="target" style="width:24px;height:24px"></i></div>
+                <h4>Brier Score Calibration</h4>
+                <p>Every forecast is tracked. When markets resolve, per-agent Brier scores update. Better-calibrated agents automatically gain more weight over time.</p>
+                <code>Brier: 0.12 → weight: 1.38x</code>
             </div>
         </div>
     </section>
@@ -154,26 +192,32 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
         <h2 class="section-title">Built Different</h2>
         <div class="features-grid">
             <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="users" style="width:20px;height:20px"></i></div>
                 <h3>12 Distinct Agents</h3>
                 <p>Macro analyst, quant trader, crypto native, skeptic, options trader — each with documented biases that create genuine disagreement.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="message-square" style="width:20px;height:20px"></i></div>
                 <h3>Multi-Round Debate</h3>
                 <p>Agents see each other's reasoning and update beliefs. Weak arguments collapse. Strong ones survive. Information cascades are tracked.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="radio-tower" style="width:20px;height:20px"></i></div>
                 <h3>15+ Live Data Feeds</h3>
                 <p>Funding rates, options flow, DeFi TVL, on-chain metrics, social sentiment, prediction market odds — fetched in parallel.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="gauge" style="width:20px;height:20px"></i></div>
                 <h3>Self-Calibrating</h3>
                 <p>Brier scores per agent, updated on resolution. Better agents gain weight over time. The swarm improves automatically.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="cpu" style="width:20px;height:20px"></i></div>
                 <h3>Any LLM</h3>
                 <p>Claude, GPT-4o, Llama, Mistral, Ollama — swap with one env var. Run fully local and private.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="terminal" style="width:20px;height:20px"></i></div>
                 <h3>REST API + CLI</h3>
                 <p>FastAPI server with interactive docs. Typer CLI for terminal. Docker for deployment. Integrate into any pipeline.</p>
             </div>
@@ -185,18 +229,18 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
         <h2 class="section-title">The 12 Agents</h2>
         <p class="section-sub">Every agent brings a different lens. That's the point.</p>
         <div class="agents-grid">
-            <div class="agent-card"><span class="agent-emoji">📊</span><strong>Macro Analyst</strong><span class="agent-focus">Fed, rates, DXY, liquidity</span></div>
-            <div class="agent-card"><span class="agent-emoji">₿</span><strong>Crypto Native</strong><span class="agent-focus">On-chain, funding, narrative</span></div>
-            <div class="agent-card"><span class="agent-emoji">📉</span><strong>Quant Trader</strong><span class="agent-focus">Base rates, vol surface</span></div>
-            <div class="agent-card"><span class="agent-emoji">📱</span><strong>Retail</strong><span class="agent-focus">Price action, Reddit, FOMO</span></div>
-            <div class="agent-card"><span class="agent-emoji">🐻</span><strong>Skeptic</strong><span class="agent-focus">Tail risks, crowded trades</span></div>
-            <div class="agent-card"><span class="agent-emoji">🔍</span><strong>On-Chain</strong><span class="agent-focus">Whale flows, reserves</span></div>
-            <div class="agent-card"><span class="agent-emoji">🏦</span><strong>Institutional</strong><span class="agent-focus">ETF flows, regulatory</span></div>
-            <div class="agent-card"><span class="agent-emoji">📅</span><strong>Events</strong><span class="agent-focus">FOMC, halvings, catalysts</span></div>
-            <div class="agent-card"><span class="agent-emoji">🌐</span><strong>DeFi</strong><span class="agent-focus">TVL, yields, governance</span></div>
-            <div class="agent-card"><span class="agent-emoji">⚡</span><strong>Options</strong><span class="agent-focus">IV, skew, gamma</span></div>
-            <div class="agent-card"><span class="agent-emoji">🌍</span><strong>Geopolitical</strong><span class="agent-focus">Regulation, sanctions</span></div>
-            <div class="agent-card"><span class="agent-emoji">📡</span><strong>Social</strong><span class="agent-focus">Reddit, Twitter, Trends</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="chart-line" style="width:18px;height:18px"></i></span><strong>Macro Analyst</strong><span class="agent-focus">Fed, rates, DXY, liquidity</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="bitcoin" style="width:18px;height:18px"></i></span><strong>Crypto Native</strong><span class="agent-focus">On-chain, funding, narrative</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="sigma" style="width:18px;height:18px"></i></span><strong>Quant Trader</strong><span class="agent-focus">Base rates, vol surface</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="smartphone" style="width:18px;height:18px"></i></span><strong>Retail</strong><span class="agent-focus">Price action, Reddit, FOMO</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="trending-down" style="width:18px;height:18px"></i></span><strong>Skeptic</strong><span class="agent-focus">Tail risks, crowded trades</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="scan-eye" style="width:18px;height:18px"></i></span><strong>On-Chain</strong><span class="agent-focus">Whale flows, reserves</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="landmark" style="width:18px;height:18px"></i></span><strong>Institutional</strong><span class="agent-focus">ETF flows, regulatory</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="calendar" style="width:18px;height:18px"></i></span><strong>Events</strong><span class="agent-focus">FOMC, halvings, catalysts</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="globe" style="width:18px;height:18px"></i></span><strong>DeFi</strong><span class="agent-focus">TVL, yields, governance</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="zap" style="width:18px;height:18px"></i></span><strong>Options</strong><span class="agent-focus">IV, skew, gamma</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="map" style="width:18px;height:18px"></i></span><strong>Geopolitical</strong><span class="agent-focus">Regulation, sanctions</span></div>
+            <div class="agent-card"><span class="agent-icon"><i data-lucide="antenna" style="width:18px;height:18px"></i></span><strong>Social</strong><span class="agent-focus">Reddit, Twitter, Trends</span></div>
         </div>
     </section>
 
@@ -206,7 +250,7 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
         <p class="section-sub">15+ free APIs, fetched in parallel, no API keys required.</p>
         <div class="data-grid">
             <div class="data-col">
-                <h4>Market & Derivatives</h4>
+                <h4><i data-lucide="candlestick-chart" style="width:14px;height:14px;vertical-align:-2px"></i> Market & Derivatives</h4>
                 <ul>
                     <li>Binance spot (BTC, ETH, SOL)</li>
                     <li>Funding rates (6 assets)</li>
@@ -217,7 +261,7 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
                 </ul>
             </div>
             <div class="data-col">
-                <h4>On-Chain & DeFi</h4>
+                <h4><i data-lucide="link" style="width:14px;height:14px;vertical-align:-2px"></i> On-Chain & DeFi</h4>
                 <ul>
                     <li>Deribit options + put/call</li>
                     <li>DeFi Llama TVL + protocols</li>
@@ -228,7 +272,7 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
                 </ul>
             </div>
             <div class="data-col">
-                <h4>Sentiment & Markets</h4>
+                <h4><i data-lucide="activity" style="width:14px;height:14px;vertical-align:-2px"></i> Sentiment & Markets</h4>
                 <ul>
                     <li>Fear & Greed (7-day)</li>
                     <li>Reddit r/cryptocurrency</li>
@@ -271,13 +315,40 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
         </div>
     </section>
 
+    <!-- Academic References -->
+    <section class="section" id="references">
+        <h2 class="section-title">Standing on Giants</h2>
+        <p class="section-sub">Built on peer-reviewed forecasting science.</p>
+        <div class="references-grid">
+            <div class="ref-card">
+                <span class="ref-tag">IARPA ACE</span>
+                <p>Satopää et al. (2014) — Extremized aggregation corrects the systematic under-confidence found in averaged probability forecasts.</p>
+            </div>
+            <div class="ref-card">
+                <span class="ref-tag">Nature 2017</span>
+                <p>Prelec et al. — The "Surprisingly Popular" algorithm exploits meta-cognitive information to find truth even when majorities are wrong.</p>
+            </div>
+            <div class="ref-card">
+                <span class="ref-tag">Cooke 1991</span>
+                <p>Classical Model for expert elicitation — weight forecasters by empirical calibration and informativeness, not just confidence.</p>
+            </div>
+            <div class="ref-card">
+                <span class="ref-tag">Genest & Zidek</span>
+                <p>Logarithmic opinion pools satisfy external Bayesianity — theoretically optimal when agents share likelihoods.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section class="section cta-section">
         <h2>Ready to find your edge?</h2>
         <p>MIT Licensed. Open source. Run locally or in the cloud.</p>
         <div class="hero-cta">
-            <a href="https://github.com/defidaddydavid/polyswarm" class="btn btn-primary">View on GitHub</a>
-            <a href="docs.html" class="btn btn-secondary">Read the Docs →</a>
+            <a href="https://github.com/defidaddydavid/polyswarm" class="btn btn-primary">
+                <i data-lucide="github" style="width:16px;height:16px"></i>
+                View on GitHub
+            </a>
+            <a href="docs.html" class="btn btn-secondary">Read the Docs <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>
         </div>
     </section>
 
@@ -295,5 +366,7 @@ Market: 42% → <span class="t-green">Edge: +6.7%</span></pre>
             <span>MIT License</span>
         </div>
     </footer>
+
+    <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -13,7 +13,7 @@
 <br />
 
 *12 AI agents with distinct personas debate in real-time, informed by 15+ live data feeds,*
-*to produce calibrated probability estimates and crowd simulations.*
+*to produce calibrated probability estimates via 7 aggregation methods and crowd simulations.*
 
 <br />
 
@@ -55,7 +55,7 @@ python main.py forecast \
 **Output:**
 - Probability estimate from 12 independent agents
 - Multi-round debate (agents update after seeing others)
-- Bayesian posterior, Monte Carlo simulation, bootstrap CI
+- 7 aggregation methods: Bayesian, extremized, surprisingly popular, LogOP, Cooke's, MC, bootstrap CI
 - Herding detection, Nash equilibrium, information cascades
 - Edge calculation vs live market odds
 
@@ -157,7 +157,7 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
     │  Round 2: Debate   │        │  Aggregate         │
     │  Update beliefs    │        │  sentiment vector  │
     │       ↓            │        │       ↓            │
-    │  3x Aggregation    │        │  Generate crowd    │
+    │  7x Aggregation    │        │  Generate crowd    │
     │  + Game Theory     │        │  narrative +       │
     │       ↓            │        │  2nd-order effects │
     │  Final probability │        │                    │
@@ -178,13 +178,24 @@ LLM_PROVIDER=openai OPENAI_API_KEY=your_key OPENAI_BASE_URL=https://api.groq.com
 
 ## Statistical Analysis
 
-Every forecast runs through a full statistical analysis pipeline:
+Every forecast runs through a full statistical analysis pipeline — 7 aggregation methods plus game-theoretic analysis:
+
+### Aggregation Methods
 
 | Method | Module | What It Does |
 |--------|--------|-------------|
 | **Bayesian Updating** | `core/bayesian.py` | Treats each agent's estimate as evidence. Updates beliefs via Bayes' theorem with KL-divergence weighting. More surprising estimates carry more information. |
+| **Extremized Aggregation** | `core/extremize.py` | Based on IARPA ACE research (Satopää/Tetlock). Corrects systematic under-confidence by pushing averages away from 50% in log-odds space. |
+| **Surprisingly Popular** | `core/surprisingly_popular.py` | Prelec et al. (2017, *Nature*). Exploits meta-cognitive information — the correct answer is often "more popular than people predict." |
+| **Log Opinion Pool** | `core/opinion_pool.py` | Multiplicative combination in log space. Satisfies external Bayesianity — theoretically optimal when agents share likelihoods. |
+| **Cooke's Classical Model** | `core/opinion_pool.py` | Performance-based weighting from expert elicitation theory. Weights by calibration AND informativeness. Unqualified agents are pruned. |
 | **Monte Carlo Simulation** | `core/statistics.py` | 5,000 simulations treating each agent as a beta distribution. Produces percentiles, skew, and threshold probabilities. |
 | **Bootstrap CI** | `core/statistics.py` | Resamples agent estimates 1,000 times to produce 95% confidence intervals. Quantifies uncertainty in the consensus. |
+
+### Game Theory & Analysis
+
+| Method | Module | What It Does |
+|--------|--------|-------------|
 | **Herding Detection** | `core/game_theory.py` | HHI-based clustering analysis. Detects when agents converge suspiciously. Flags contrarian signals. |
 | **Information Cascades** | `core/game_theory.py` | Tracks belief shifts between debate rounds. Detects when agents flip sides and whether convergence was genuine. |
 | **Nash Equilibrium** | `core/game_theory.py` | Checks if consensus is stable — would any agent benefit from deviating? Unstable = low-confidence forecast. |
